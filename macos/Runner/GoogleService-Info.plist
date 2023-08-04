@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>31120846839-po4jg2vmf4g8ssrk4ong3n72q9v9orgi.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.31120846839-po4jg2vmf4g8ssrk4ong3n72q9v9orgi</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>31120846839-tj54bsstcsr4dn2s9o5ahjbs3d7s6u3d.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCaoqzTXZvF9uzSDBvvj_Y8efsrhCb2SG4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>31120846839</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.barodaChestGroupAdmin.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>barodachestgroup-b6b77</string>
+	<key>STORAGE_BUCKET</key>
+	<string>barodachestgroup-b6b77.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:31120846839:ios:fe3a939c37ae4e7d8348f2</string>
+</dict>
+</plist>
