@@ -1,8 +1,6 @@
-import 'package:baroda_chest_group_admin/backend/case_of_month/case_of_month_controller.dart';
-import 'package:baroda_chest_group_admin/backend/case_of_month/case_of_month_provider.dart';
+import 'package:baroda_chest_group_admin/backend/guide_line/guideline_controller.dart';
+import 'package:baroda_chest_group_admin/backend/guide_line/guideline_provider.dart';
 import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/utils/my_print.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,48 +10,50 @@ import '../../../backend/navigation/navigation_controller.dart';
 import '../../../backend/navigation/navigation_operation_parameters.dart';
 import '../../../backend/navigation/navigation_type.dart';
 import '../../../configs/constants.dart';
+import '../../../models/profile/data_model/guideline_model.dart';
 import '../../../utils/app_colors.dart';
+import '../../../utils/my_utils.dart';
 import '../../common/components/common_button.dart';
-import '../../common/components/common_cachednetwork_image.dart';
 import '../../common/components/common_popup.dart';
 import '../../common/components/common_progress_indicator.dart';
 import '../../common/components/common_text.dart';
 import '../../common/components/header_widget.dart';
 import '../../common/components/modal_progress_hud.dart';
 
-class CaseOfMonthScreenNavigator extends StatefulWidget {
-  const CaseOfMonthScreenNavigator({Key? key}) : super(key: key);
+class GuidelineScreenNavigator extends StatefulWidget {
+  const GuidelineScreenNavigator({Key? key}) : super(key: key);
 
   @override
-  _CaseOfMonthScreenNavigatorState createState() => _CaseOfMonthScreenNavigatorState();
+  _GuidelineScreenNavigatorState createState() => _GuidelineScreenNavigatorState();
 }
 
-class _CaseOfMonthScreenNavigatorState extends State<CaseOfMonthScreenNavigator>  {
+class _GuidelineScreenNavigatorState extends State<GuidelineScreenNavigator>  {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: NavigationController.caseOfMonthScreenNavigator,
-      onGenerateRoute: NavigationController.onCaseOfMonthGeneratedRoutes,
+      key: NavigationController.guidelineScreenNavigator,
+      onGenerateRoute: NavigationController.onGuidelineGeneratedRoutes,
     );
   }
 }
 
-class CaseOfMonthList extends StatefulWidget {
-  const CaseOfMonthList({super.key});
+
+class GuideLineScreen extends StatefulWidget {
+  const GuideLineScreen({super.key});
 
   @override
-  State<CaseOfMonthList> createState() => _CaseOfMonthListState();
+  State<GuideLineScreen> createState() => _GuideLineScreenState();
 }
 
-class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
+class _GuideLineScreenState extends State<GuideLineScreen> with MySafeState{
   ScrollController scrollController = ScrollController();
   bool isLoading = false;
 
-  late CaseOfMonthProvider caseOfMonthProvider;
-  late CaseOfMonthController caseOfMonthController;
+  late GuidelineProvider guidelineProvider;
+  late GuidelineController guidelineController;
 
   Future<void> getData({bool isRefresh = true, bool isFromCache = false, bool isNotify = true}) async {
-    await caseOfMonthController.getCaseOfMonthPaginatedList(
+    await guidelineController.getGuidelinePaginatedList(
       isRefresh: isRefresh,
       isFromCache: isFromCache,
       isNotify: isNotify,
@@ -63,8 +63,8 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
   @override
   void initState() {
     super.initState();
-    caseOfMonthProvider = Provider.of<CaseOfMonthProvider>(context, listen: false);
-    caseOfMonthController = CaseOfMonthController(caseOfMonthProvider: caseOfMonthProvider);
+    guidelineProvider = Provider.of<GuidelineProvider>(context, listen: false);
+    guidelineController = GuidelineController(guidelineProvider: guidelineProvider);
 
     getData(
       isRefresh: true,
@@ -89,20 +89,20 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
         child: Column(
           children: [
             HeaderWidget(
-              title: "Case Of Month",
+              title: "Guide Line",
               suffixWidget: CommonButton(
-                text: "Add Case Of Month",
+                text: "Add guideLine",
                 icon: Icon(
                   Icons.add,
                   color: AppColor.white,
                 ),
                 onTap: () async {
-                  await NavigationController.navigateToAddCaseOfMonthScreen(
+                  await NavigationController.navigateToAddGuidelineScreen(
                       navigationOperationParameters: NavigationOperationParameters(
                         navigationType: NavigationType.pushNamed,
                         context: context,
                       ),
-                      addCourseScreenNavigationArguments: AddCaseOfMonthScreenNavigationArguments());
+                      addGuidelineNavigationArguments: AddGuidelineNavigationArguments());
                   // getData(
                   //   isRefresh: true,
                   //   isFromCache: false,
@@ -120,12 +120,12 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
   }
 
   Widget getCourseList({required BuildContext topContext}) {
-    return Consumer(builder: (BuildContext context, CaseOfMonthProvider caseOfMonthProvider, Widget? child) {
-      if (caseOfMonthProvider.isCaseOfMonthFirstTimeLoading.get()) {
+    return Consumer(builder: (BuildContext context, GuidelineProvider guidelineProvider, Widget? child) {
+      if (guidelineProvider.isGuidelineFirstTimeLoading.get()) {
         return const Center(child: CommonProgressIndicator());
       }
 
-      if (!caseOfMonthProvider.isCaseOfMonthLoading.get() && caseOfMonthProvider.allCaseOfMonthLength == 0) {
+      if (!guidelineProvider.isGuidelineLoading.get() && guidelineProvider.alGuidelineLength == 0) {
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return RefreshIndicator(
@@ -150,7 +150,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
         );
       }
 
-      List<CaseOfMonthModel> caseOfMonth = caseOfMonthProvider.caseOfMonthList.getList(isNewInstance: false);
+      List<GuidelineModel> guidelineModel = guidelineProvider.guidelineList.getList(isNewInstance: false);
 
       double? cacheExtent = scrollController.hasClients ? scrollController.position.maxScrollExtent : null;
       // MyPrint.printOnConsole("cacheExtent:$cacheExtent");
@@ -167,10 +167,10 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
           controller: scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           cacheExtent: cacheExtent,
-          itemCount: caseOfMonth.length + 1,
+          itemCount: guidelineModel.length + 1,
           itemBuilder: (BuildContext context, int index) {
-            if ((index == 0 && caseOfMonth.isEmpty) || (index == caseOfMonth.length)) {
-              if (caseOfMonthProvider.isCaseOfMonthLoading.get()) {
+            if ((index == 0 && guidelineModel.isEmpty) || (index == guidelineModel.length)) {
+              if (guidelineProvider.isGuidelineLoading.get()) {
                 // if(true) {
                 return const CommonProgressIndicator();
               } else {
@@ -178,13 +178,13 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
               }
             }
 
-            if (caseOfMonthProvider.hasMoreCaseOfMonth.get() && index > (caseOfMonth.length - AppConstants.coursesRefreshLimitForPagination)) {
+            if (guidelineProvider.hasMoreGuideline.get() && index > (guidelineModel.length - AppConstants.coursesRefreshLimitForPagination)) {
               WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                caseOfMonthController.getCaseOfMonthPaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
+                guidelineController.getGuidelinePaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
               });
             }
 
-            CaseOfMonthModel model = caseOfMonth[index];
+            GuidelineModel model = guidelineModel[index];
 
             return singleCourse(model, index, topContext);
           },
@@ -193,8 +193,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
     });
   }
 
-  Widget singleCourse(CaseOfMonthModel caseOfMonthModel, int index, BuildContext topContext) {
-    MyPrint.printOnConsole("image urllll: ${caseOfMonthModel.image}");
+  Widget singleCourse(GuidelineModel guidelineModel, int index, BuildContext topContext) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: InkWell(
@@ -203,17 +202,17 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Want to Edit course?",
+                text: "Want to Edit Guideline?",
                 rightText: "Yes",
                 rightOnTap: () async {
                   Navigator.pop(context);
-                  await NavigationController.navigateToAddCaseOfMonthScreen(
+                  await NavigationController.navigateToAddGuidelineScreen(
                     navigationOperationParameters: NavigationOperationParameters(
                       navigationType: NavigationType.pushNamed,
                       context: topContext,
                     ),
-                    addCourseScreenNavigationArguments: AddCaseOfMonthScreenNavigationArguments(
-                      caseOfMonthModel: caseOfMonthModel,
+                    addGuidelineNavigationArguments: AddGuidelineNavigationArguments(
+                      guidelineModel: guidelineModel,
                       index: index,
                       isEdit: true,
                     ),
@@ -234,63 +233,32 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
           ),
           child: Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: AppColor.bgSideMenu.withOpacity(.6)),
-                ),
-                // child: Image.network(
-                //   eventModel.imageUrl,
-                //   height: 80,
-                //   width: 80,
-                // ),
-                child: CommonCachedNetworkImage(
-                  imageUrl: caseOfMonthModel.image,
-                  height: 80,
-                  width: 80,
-                  borderRadius: 4,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      text: guidelineModel.name,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: guidelineModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(guidelineModel.createdTime!.toDate())}',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CommonText(
-                    text: caseOfMonthModel.caseName,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  const SizedBox(height: 10),
-                  CommonText(
-                    text: caseOfMonthModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(caseOfMonthModel.createdTime!.toDate())}',
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    textOverFlow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-              const SizedBox(width: 20),
-              const Spacer(),
-              // InkWell(
-              //   onTap: (){},
-              //   child: Tooltip(
-              //     message: 'Copy New Game',
-              //     child: Padding(
-              //       padding: const EdgeInsets.all(5.0),
-              //       child: Icon(Icons.copy,color: AppColor.bgSideMenu),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(width: 20),
-              // getTestEnableSwitch(
-              //   value: eventModel.enabled,
-              //   onChanged: (val) {
-              //     Map<String, dynamic> data = {
-              //       "enabled": val,
-              //     };
-              //     // eventController.enableDisableCourseInFirebase(editableData: data, id: courseModel.id, listIndex: index);
-              //   },
-              // ),
+              if(guidelineModel.downloadUrl.isNotEmpty)
+                InkWell(
+                    onTap:(){
+
+                      MyUtils.launchUrlString(url: guidelineModel.downloadUrl);
+                    },
+                    child: Icon(Icons.remove_red_eye))
             ],
           ),
         ),

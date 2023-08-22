@@ -1,4 +1,10 @@
+import 'package:baroda_chest_group_admin/backend/brochure/brochure_provider.dart';
+import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_provider.dart';
+import 'package:baroda_chest_group_admin/backend/contact_us/contact_us_provider.dart';
 import 'package:baroda_chest_group_admin/backend/event_backend/event_provider.dart';
+import 'package:baroda_chest_group_admin/backend/guide_line/guideline_provider.dart';
+import 'package:baroda_chest_group_admin/backend/member/member_provider.dart';
+import 'package:baroda_chest_group_admin/backend/photo_gallery/photo_gallery_provider.dart';
 import 'package:baroda_chest_group_admin/utils/WebPageLoad/web_page_load_non_web.dart';
 import 'package:baroda_chest_group_admin/views/common/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,7 +18,6 @@ import 'backend/common/common_provider.dart';
 import 'backend/common/menu_provider.dart';
 import 'backend/navigation/navigation_controller.dart';
 import 'backend/users_backend/user_provider.dart';
-import 'configs/constants.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'firebase_options.dart';
@@ -45,8 +50,12 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider(), lazy: false),
         ChangeNotifierProvider<EventProvider>(create: (_) => EventProvider(), lazy: false),
         ChangeNotifierProvider<CaseOfMonthProvider>(create: (_) => CaseOfMonthProvider(), lazy: false),
-
-
+        ChangeNotifierProvider<BrochureProvider>(create: (_) => BrochureProvider(), lazy: false),
+        ChangeNotifierProvider<PhotoGalleryProvider>(create: (_) => PhotoGalleryProvider(), lazy: false),
+        ChangeNotifierProvider<MemberProvider>(create: (_) => MemberProvider(), lazy: false),
+        ChangeNotifierProvider<CommitteeMemberProvider>(create: (_) => CommitteeMemberProvider(), lazy: false),
+        ChangeNotifierProvider<GuidelineProvider>(create: (_) => GuidelineProvider(), lazy: false),
+        ChangeNotifierProvider<ContactUsProvider>(create: (_) => ContactUsProvider(), lazy: false),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

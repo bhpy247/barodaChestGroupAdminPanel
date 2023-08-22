@@ -62,7 +62,7 @@ class CaseOfMonthProvider extends CommonProvider {
     }
   }
 
-  void addCourseModelInCourseList(CaseOfMonthModel value, {bool isNotify = true}) {
+  void addCaseOfMonthModelInCourseList(CaseOfMonthModel value, {bool isNotify = true}) {
     caseOfMonthList.insertAtIndex(index: 0, model: value, isNotify: isNotify);
   }
   //endregion

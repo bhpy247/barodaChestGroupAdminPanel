@@ -129,9 +129,9 @@ class FirebaseNodes {
     collectionName: galleryCollection,
   );
 
-  static MyFirestoreDocumentReference galleryDocumentReference({String? userId}) => FirestoreController.documentReference(
+  static MyFirestoreDocumentReference galleryDocumentReference({String? documentId}) => FirestoreController.documentReference(
     collectionName: galleryCollection,
-    documentId: userId,
+    documentId: documentId,
   );
   //endregion
   // region Gallery
@@ -180,7 +180,7 @@ class FirebaseNodes {
   );
 
   static MyFirestoreDocumentReference committeeMemberDocumentReference({String? userId}) => FirestoreController.documentReference(
-    collectionName: contactUsCollection,
+    collectionName: committeeMemberCollection,
     documentId: userId,
   );
   //endregion
@@ -188,12 +188,12 @@ class FirebaseNodes {
   static const String memberCollection = "member";
 
   static MyFirestoreCollectionReference get memberCollectionReference => FirestoreController.collectionReference(
-    collectionName: committeeMemberCollection,
+    collectionName: memberCollection,
   );
 
-  static MyFirestoreDocumentReference memberDocumentReference({String? userId}) => FirestoreController.documentReference(
-    collectionName: contactUsCollection,
-    documentId: userId,
+  static MyFirestoreDocumentReference memberDocumentReference({String? docId}) => FirestoreController.documentReference(
+    collectionName: memberCollection,
+    documentId: docId,
   );
   //endregion
 

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../utils/parsing_helper.dart';
 
-class ContactUsRequestModel {
+class ContactUsModel {
   String id = "";
   String name = "";
   String email = "";
@@ -11,7 +11,7 @@ class ContactUsRequestModel {
   Timestamp? createdTime;
 
 
-  ContactUsRequestModel({
+  ContactUsModel({
     this.id = "",
     this.name = "",
     this.email = "",
@@ -20,7 +20,7 @@ class ContactUsRequestModel {
     this.createdTime,
 
   });
-  ContactUsRequestModel.fromMap(Map<String, dynamic> map) {
+  ContactUsModel.fromMap(Map<String, dynamic> map) {
     initializeFromMap(map);
   }
 

@@ -6,6 +6,7 @@ class CaseOfMonthModel {
   String id = "";
   String caseName = "";
   String description = "";
+  String downloadUrl = "";
   String image = "";
   Timestamp? createdTime;
   Timestamp? updatedTime;
@@ -14,6 +15,7 @@ class CaseOfMonthModel {
     this.id = "",
     this.caseName = "",
     this.description = "",
+    this.downloadUrl = "",
     this.image = "",
     this.createdTime,
     this.updatedTime,
@@ -31,6 +33,7 @@ class CaseOfMonthModel {
     id = ParsingHelper.parseStringMethod(map['id']);
     caseName = ParsingHelper.parseStringMethod(map['caseName']);
     image = ParsingHelper.parseStringMethod(map['image']);
+    downloadUrl = ParsingHelper.parseStringMethod(map['downloadUrl']);
     description = ParsingHelper.parseStringMethod(map['description']);
     createdTime = ParsingHelper.parseTimestampMethod(map['createdTime']);
     updatedTime = ParsingHelper.parseTimestampMethod(map['updatedTime']);
@@ -41,6 +44,7 @@ class CaseOfMonthModel {
       "id": id,
       "caseName": caseName,
       "image": image,
+      "downloadUrl": downloadUrl,
       "description": description,
       "createdTime": createdTime,
       "updatedTime": updatedTime,

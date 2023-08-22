@@ -8,7 +8,7 @@ class GalleryModel {
   String description = "";
   Timestamp? createdTime;
   Timestamp? eventDate;
-  List<String> sliders = [];
+  List<String> imageList = [];
 
 
    GalleryModel({
@@ -17,7 +17,7 @@ class GalleryModel {
     this.description = "",
     this.createdTime,
     this.eventDate,
-     this.sliders = const  [],
+     this.imageList = const  [],
 
   });
    GalleryModel.fromMap(Map<String, dynamic> map) {
@@ -30,8 +30,7 @@ class GalleryModel {
 
   void initializeFromMap(Map<String, dynamic> map) {
     id = ParsingHelper.parseStringMethod(map['id']);
-    sliders = ParsingHelper.parseListMethod<dynamic, String>(map['imageUrl']);
-
+    imageList = ParsingHelper.parseListMethod<dynamic, String>(map['imageUrlList']);
     eventName = ParsingHelper.parseStringMethod(map['eventName']);
     description = ParsingHelper.parseStringMethod(map['description']);
     createdTime = ParsingHelper.parseTimestampMethod(map['createdTime']);
@@ -41,7 +40,7 @@ class GalleryModel {
   Map<String, dynamic> toMap({bool toJson = false}) {
     return <String, dynamic>{
       "id": id,
-      "sliders": sliders,
+      "imageUrlList": imageList,
       "eventName": eventName,
       "description": description,
       "createdTime": createdTime,

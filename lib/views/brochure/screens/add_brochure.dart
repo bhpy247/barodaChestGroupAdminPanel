@@ -1,10 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:baroda_chest_group_admin/backend/case_of_month/case_of_month_provider.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
+import 'package:baroda_chest_group_admin/models/brochure/data_model/brochure_model.dart';
 import 'package:baroda_chest_group_admin/utils/extensions.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,11 +9,11 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../backend/case_of_month/case_of_month_controller.dart';
+import '../../../backend/brochure/brochure_controller.dart';
+import '../../../backend/brochure/brochure_provider.dart';
 import '../../../backend/common/firebase_storage_controller.dart';
 import '../../../backend/navigation/navigation_arguments.dart';
 import '../../../utils/app_colors.dart';
-import '../../../utils/date_presentation.dart';
 import '../../../utils/my_print.dart';
 import '../../../utils/my_toast.dart';
 import '../../../utils/my_utils.dart';
@@ -30,27 +26,27 @@ import '../../common/components/get_title.dart';
 import '../../common/components/header_widget.dart';
 import '../../common/components/modal_progress_hud.dart';
 
-class AddCaseOfMonthScreen extends StatefulWidget {
+class AddBrochure extends StatefulWidget {
   static const String routeName = "/addcaseofmonth";
-  final AddCaseOfMonthScreenNavigationArguments arguments;
+  final AddBrochureNavigationArguments arguments;
 
-  const AddCaseOfMonthScreen({super.key, required this.arguments});
+  const AddBrochure({super.key, required this.arguments});
 
   @override
-  State<AddCaseOfMonthScreen> createState() => _AddCaseOfMonthScreenState();
+  State<AddBrochure> createState() => _AddBrochureState();
 }
 
-class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafeState {
+class _AddBrochureState extends State<AddBrochure> with MySafeState {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   bool isCourseEnabled = true;
 
   late Future<void> futureGetData;
-  late CaseOfMonthProvider caseOfMonthProvider;
-  late CaseOfMonthController caseOfMonthController;
+  late BrochureProvider brochureProvider;
+  late BrochureController brochureController;
   DateTime? eventStartDate, eventEndDate;
 
-  TextEditingController eventCaseNameController = TextEditingController();
+  TextEditingController eventBrochureNameController = TextEditingController();
   TextEditingController googleDriveUrlController = TextEditingController();
   TextEditingController eventDescriptionController = TextEditingController();
 
@@ -58,18 +54,16 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
   Uint8List? thumbnailImage;
   String? thumbnailImageName;
 
-  CaseOfMonthModel? pageCourseModel;
+  BrochureModel? pageCourseModel;
 
   Future<void> getData() async {
-    if (widget.arguments.caseOfMonthModel != null) {
-      pageCourseModel = widget.arguments.caseOfMonthModel;
+    if (widget.arguments.brochureModel != null) {
+      pageCourseModel = widget.arguments.brochureModel;
     }
 
     if (pageCourseModel != null) {
-      eventCaseNameController.text = pageCourseModel!.caseName;
-      eventDescriptionController.text = pageCourseModel!.description;
-      thumbnailImageUrl = pageCourseModel!.image;
-      googleDriveUrlController.text = pageCourseModel!.downloadUrl;
+      eventBrochureNameController.text = pageCourseModel!.brochureName;
+      googleDriveUrlController.text = pageCourseModel!.brochureUrl;
     }
   }
 
@@ -137,7 +131,7 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     return firebaseStorageImageUrl;
   }
 
-  Future<void> addCaseOfMonthToFirebase() async {
+  Future<void> addBrochureToFirebase() async {
     setState(() {
       isLoading = true;
     });
@@ -147,53 +141,41 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       courseId = MyUtils.getNewId(isFromUUuid: false);
     }
 
-    if (thumbnailImageName != null) {
-      thumbnailImageUrl = await uploadFileToFirebaseStorage(courseId: courseId, imageName: thumbnailImageName!);
-    }
-
-    if (thumbnailImageUrl == null) {
-      // ignore: use_build_context_synchronously
-      MyToast.showError(context: context, msg: 'There is some issue in uploading course image. Kindly try again!');
-      return;
-    }
-
-    CaseOfMonthModel caseOfMonthModel = CaseOfMonthModel(
+    BrochureModel brochureModel = BrochureModel(
       id: courseId.trim(),
-      caseName: eventCaseNameController.text.trim(),
-      description: eventDescriptionController.text.trim(),
-      image: thumbnailImageUrl!.trim(),
+      brochureName: eventBrochureNameController.text.trim(),
+      brochureUrl: googleDriveUrlController.text.trim(),
       createdTime: pageCourseModel?.createdTime ?? Timestamp.now(),
       updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
 
-    await caseOfMonthController.addCaseOfMonthToFirebase(
-      caseOfMonth: caseOfMonthModel,
+    await brochureController.addBrochureToFirebase(
+      caseOfMonth: brochureModel,
       isAdInProvider: pageCourseModel == null,
     );
-    MyPrint.printOnConsole('Added Course Model is ${caseOfMonthModel.toMap()}');
+    MyPrint.printOnConsole('Added Course Model is ${brochureModel.toMap()}');
 
     if (pageCourseModel != null) {
-      CaseOfMonthModel model = pageCourseModel!;
-      model.caseName = caseOfMonthModel.caseName;
-      model.description = caseOfMonthModel.description;
-      model.image = caseOfMonthModel.image;
-      model.createdTime = caseOfMonthModel.createdTime;
-      model.updatedTime = caseOfMonthModel.updatedTime;
+      BrochureModel model = pageCourseModel!;
+      model.brochureName = brochureModel.brochureName;
+      model.brochureUrl = brochureModel.brochureUrl;
+      model.createdTime = brochureModel.createdTime;
+      model.updatedTime = brochureModel.updatedTime;
     }
 
     setState(() {
       isLoading = false;
     });
     if (context.mounted && context.checkMounted()) {
-      MyToast.showSuccess(context: context, msg: pageCourseModel == null ? 'Case Of Month Added Successfully' : 'Case Of Month Edited Successfully');
+      MyToast.showSuccess(context: context, msg: pageCourseModel == null ? 'Brochure Added Successfully' : 'Brochure Edited Successfully');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    caseOfMonthProvider = Provider.of<CaseOfMonthProvider>(context, listen: false);
-    caseOfMonthController = CaseOfMonthController(caseOfMonthProvider: caseOfMonthProvider);
+    brochureProvider = Provider.of<BrochureProvider>(context, listen: false);
+    brochureController = BrochureController(brochureProvider: brochureProvider);
     futureGetData = getData();
   }
 
@@ -216,7 +198,7 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
                 key: _formKey,
                 child: Column(
                   children: [
-                    HeaderWidget(title: pageCourseModel == null ? "Add Case Of Month" : "Edit Case Of Month", isBackArrow: true),
+                    HeaderWidget(title: pageCourseModel == null ? "Add Brochure" : "Edit Brochure", isBackArrow: true),
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
@@ -226,10 +208,6 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
                             getCaseName(),
                             const SizedBox(height: 20),
                             getDownloadUrlField(),
-                            const SizedBox(height: 20),
-                            getDescriptionTextField(),
-                            const SizedBox(height: 20),
-                            chooseThumbnailImageAndBackgroundColor(),
                             const SizedBox(height: 30),
                             submitButton(),
                             const SizedBox(height: 40),
@@ -258,13 +236,13 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GetTitle(title: "Enter Case Name*"),
+              GetTitle(title: "Enter Brochure Name*"),
               CommonTextFormField(
-                controller: eventCaseNameController,
-                hintText: "Enter Case Name",
+                controller: eventBrochureNameController,
+                hintText: "Enter Brochure Name",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "  Please enter Case Name";
+                    return "  Please enter Brochure Name";
                   }
                   return null;
                 },
@@ -356,16 +334,12 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     return CommonButton(
       onTap: () async {
         if (_formKey.currentState!.validate()) {
-          if (thumbnailImage == null && thumbnailImageUrl.checkEmpty) {
-            MyToast.showError(context: context, msg: 'Please upload a course thumbnail image');
-            return;
-          }
 
           dynamic newValue = await showDialog(
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this chapter?",
+                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this brochure?",
                 leftText: "No",
                 rightText: "Yes",
                 rightOnTap: () {
@@ -380,12 +354,12 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             return;
           }
 
-          await addCaseOfMonthToFirebase();
+          await addBrochureToFirebase();
           // ignore: use_build_context_synchronously
           Navigator.pop(context);
         }
       },
-      text: pageCourseModel == null ? '+   Add Case Of Month ' : '+   Edit Case Of Month',
+      text: pageCourseModel == null ? '+   Add Brochure ' : '+   Edit Brochure',
       fontSize: 17,
     );
   }

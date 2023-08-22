@@ -113,16 +113,16 @@ class CaseOfMonthController {
   //   }
   // }
 
-  Future<void> addEventToFirebase({required CaseOfMonthModel caseOfMonth, bool isAdInProvider = false}) async {
+  Future<void> addCaseOfMonthToFirebase({required CaseOfMonthModel caseOfMonth, bool isAdInProvider = false}) async {
     MyPrint.printOnConsole("CourseController().addCourseToFirebase() called with courseModel:'$caseOfMonth'");
 
     try {
       await caseOfMonthRepository.addCaseOfMonthRepo(caseOfMonth);
       if (isAdInProvider) {
-        caseOfMonthProvider.addCourseModelInCourseList(caseOfMonth);
+        caseOfMonthProvider.addCaseOfMonthModelInCourseList(caseOfMonth);
       } else {
-        String title = "Event updated";
-        String description = "'${caseOfMonth.caseName}' Event has been added";
+        String title = "Case of month updated";
+        String description = "'${caseOfMonth.caseName}' Case of month has been added";
         String image = caseOfMonth.image;
 
         NotificationController.sendNotificationMessage2(

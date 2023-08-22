@@ -1,5 +1,11 @@
+import 'package:baroda_chest_group_admin/views/brochure/screens/brochure_list.dart';
 import 'package:baroda_chest_group_admin/views/caseofmonth/screens/case_of_month_list.dart';
+import 'package:baroda_chest_group_admin/views/committeeMember/screens/committee_member_list.dart';
+import 'package:baroda_chest_group_admin/views/contact_us/screen/contact_us_screeen.dart';
 import 'package:baroda_chest_group_admin/views/events/screens/event_list_screen.dart';
+import 'package:baroda_chest_group_admin/views/guideLine/screen/guideline_screen.dart';
+import 'package:baroda_chest_group_admin/views/member/screen/member_list.dart';
+import 'package:baroda_chest_group_admin/views/photoGallery/screens/photo_gallery_screeen.dart';
 import 'package:baroda_chest_group_admin/views/users/screens/users_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -22,7 +28,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   int tabNumber = 0;
 
   @override
@@ -41,56 +46,73 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       drawer: SideBar(drawerListTile: [
         DrawerListTile(
-          title: "Users",
+          title: "Events",
           icon: Icons.account_box_outlined,
           press: () {
             setState(() {
-              tabNumber=0;
+              tabNumber = 0;
             });
           },
         ),
         DrawerListTile(
-          title: "Devices",
+          title: "Case Of Month",
           icon: Icons.view_in_ar_outlined,
           press: () {
             setState(() {
-              tabNumber=1;
+              tabNumber = 1;
             });
           },
         ),
         DrawerListTile(
-          title: "Games",
-          icon: Icons.videogame_asset_outlined,
+          title: "Brochure",
+          icon: MdiIcons.frequentlyAskedQuestions,
           press: () {
             setState(() {
-              tabNumber=2;
+              tabNumber = 2;
             });
           },
         ),
         DrawerListTile(
-          title: "Orders",
-          icon: Icons.auto_graph,
+          title: "Photo Gallery",
+          icon: Icons.photo_library,
           press: () {
             setState(() {
-              tabNumber=3;
+              tabNumber = 3;
             });
           },
         ),
         DrawerListTile(
-          title: "Subscriptions",
-          icon: Icons.dashboard,
+          title: "Member",
+          icon: Icons.person,
           press: () {
             setState(() {
-              tabNumber=4;
+              tabNumber = 4;
             });
           },
         ),
         DrawerListTile(
-          title: "OKOTO",
-          icon: Icons.library_books_outlined,
+          title: "Committee Member",
+          icon: Icons.remember_me_rounded,
           press: () {
             setState(() {
-              tabNumber=5;
+              tabNumber = 5;
+            });
+          },
+        ),
+        DrawerListTile(
+          title: "GuideLine",
+          icon: MdiIcons.televisionGuide,
+          press: () {
+            setState(() {
+              tabNumber = 6;
+            });
+          },
+        ),DrawerListTile(
+          title: "Contact Us",
+          icon: MdiIcons.contacts,
+          press: () {
+            setState(() {
+              tabNumber = 7;
             });
           },
         ),
@@ -110,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                       icon: Icons.account_box_outlined,
                       press: () {
                         setState(() {
-                          tabNumber=0;
+                          tabNumber = 0;
                         });
                       },
                     ),
@@ -119,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                       icon: Icons.view_in_ar_outlined,
                       press: () {
                         setState(() {
-                          tabNumber=1;
+                          tabNumber = 1;
                         });
                       },
                     ),
@@ -128,16 +150,51 @@ class _HomePageState extends State<HomePage> {
                       icon: MdiIcons.frequentlyAskedQuestions,
                       press: () {
                         setState(() {
-                          tabNumber=2;
+                          tabNumber = 2;
                         });
                       },
                     ),
                     DrawerListTile(
-                      title: "Settings",
-                      icon: Icons.feedback,
+                      title: "Photo Gallery",
+                      icon: Icons.photo_library,
                       press: () {
                         setState(() {
-                          tabNumber=3;
+                          tabNumber = 3;
+                        });
+                      },
+                    ),
+                    DrawerListTile(
+                      title: "Member",
+                      icon: Icons.person,
+                      press: () {
+                        setState(() {
+                          tabNumber = 4;
+                        });
+                      },
+                    ),
+                    DrawerListTile(
+                      title: "Committee Member",
+                      icon: Icons.remember_me_rounded,
+                      press: () {
+                        setState(() {
+                          tabNumber = 5;
+                        });
+                      },
+                    ),
+                    DrawerListTile(
+                      title: "GuideLine",
+                      icon: MdiIcons.televisionGuide,
+                      press: () {
+                        setState(() {
+                          tabNumber = 6;
+                        });
+                      },
+                    ),DrawerListTile(
+                      title: "Contact Us",
+                      icon: MdiIcons.contacts,
+                      press: () {
+                        setState(() {
+                          tabNumber = 7;
                         });
                       },
                     ),
@@ -181,17 +238,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget getPageWidget(int number){
-    switch(number){
-      case 0:{
-        return const EventScreenNavigator();
-      }
-      case 1:{
-        return const CaseOfMonthScreenNavigator();
-      }
-      case 2:{
-        return const UserScreenNavigator();
-      }
+  Widget getPageWidget(int number) {
+    switch (number) {
+      case 0:
+        {
+          return const EventScreenNavigator();
+        }
+      case 1:
+        {
+          return const CaseOfMonthScreenNavigator();
+        }
+      case 2:
+        {
+          return const BrochureScreenNavigator();
+        }
+      case 3:
+        {
+          return const PhotoGalleryScreenNavigator();
+        }
+      case 4:
+        {
+          return const MemberScreenNavigator();
+        }
+      case 5:
+        {
+          return const CommitteeMemberScreenNavigator();
+        }
+
+      case 6:
+        {
+          return const GuidelineScreenNavigator();
+        }
+      case 7:
+        {
+          return const ContactUsScreenNavigator();
+        }
 
       // case 4:{
       //   return const SubscriptionPlanNavigator();
@@ -199,12 +280,10 @@ class _HomePageState extends State<HomePage> {
       // case 5:{
       //   return const OkotoProfileScreenNavigator();
       // }
-      default : {
-        return  const UserScreenNavigator();
-
-      }
-
+      default:
+        {
+          return const UserScreenNavigator();
+        }
     }
   }
-
 }

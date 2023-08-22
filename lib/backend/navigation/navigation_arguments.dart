@@ -1,5 +1,10 @@
 
+import 'package:baroda_chest_group_admin/models/brochure/data_model/brochure_model.dart';
 import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
+import 'package:baroda_chest_group_admin/models/profile/data_model/committee_member_model.dart';
+import 'package:baroda_chest_group_admin/models/profile/data_model/gallery_model.dart';
+import 'package:baroda_chest_group_admin/models/profile/data_model/guideline_model.dart';
+import 'package:baroda_chest_group_admin/models/profile/data_model/member_model.dart';
 
 import '../../models/course/data_model/course_model.dart';
 import '../../models/event/data_model/event_model.dart';
@@ -28,6 +33,44 @@ class AddCaseOfMonthScreenNavigationArguments extends NavigationArguments {
   int? index;
 
   AddCaseOfMonthScreenNavigationArguments({this.isEdit = false, this.caseOfMonthModel, this.index});
+}
+class AddBrochureNavigationArguments extends NavigationArguments {
+  BrochureModel? brochureModel;
+  bool isEdit = false;
+  int? index;
+
+  AddBrochureNavigationArguments({this.isEdit = false, this.brochureModel, this.index});
+}
+
+class AddGuidelineNavigationArguments extends NavigationArguments {
+  GuidelineModel? guidelineModel;
+  bool isEdit = false;
+  int? index;
+
+  AddGuidelineNavigationArguments({this.isEdit = false, this.guidelineModel, this.index});
+}
+
+class AddPhotoGalleryNavigationArguments extends NavigationArguments {
+  GalleryModel? galleryModel;
+  bool isEdit = false;
+  int? index;
+
+  AddPhotoGalleryNavigationArguments({this.isEdit = false, this.galleryModel, this.index});
+}
+class AddMemberScreenNavigationArguments extends NavigationArguments {
+  MemberModel? memberModel;
+  bool isEdit = false;
+  int? index;
+
+  AddMemberScreenNavigationArguments({this.isEdit = false, this.memberModel, this.index});
+}
+
+class AddCommitteeMemberScreenNavigationArguments extends NavigationArguments {
+  CommitteeMemberModel? committeeMemberModel;
+  bool isEdit = false;
+  int? index;
+
+  AddCommitteeMemberScreenNavigationArguments({this.isEdit = false, this.committeeMemberModel, this.index});
 }
 
 class UserProfileViewScreenNavigationArguments extends NavigationArguments {

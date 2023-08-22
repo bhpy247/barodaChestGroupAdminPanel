@@ -492,7 +492,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Choose Course Thumbnail Image*"),
+        GetTitle(title: "Choose Event Thumbnail Image*"),
         thumbnailImage == null && thumbnailImageUrl == null && (thumbnailImageUrl?.isEmpty ?? true)
             ? InkWell(
                 onTap: () async {

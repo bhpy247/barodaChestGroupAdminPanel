@@ -1,9 +1,10 @@
-import 'package:baroda_chest_group_admin/backend/case_of_month/case_of_month_controller.dart';
-import 'package:baroda_chest_group_admin/backend/case_of_month/case_of_month_provider.dart';
 import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
+import 'package:baroda_chest_group_admin/backend/photo_gallery/photo_gallery_controller.dart';
+import 'package:baroda_chest_group_admin/backend/photo_gallery/photo_gallery_provider.dart';
+import 'package:baroda_chest_group_admin/models/profile/data_model/gallery_model.dart';
 import 'package:baroda_chest_group_admin/utils/my_print.dart';
-import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
+import 'package:baroda_chest_group_admin/views/common/components/common_cachednetwork_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,47 +14,47 @@ import '../../../backend/navigation/navigation_operation_parameters.dart';
 import '../../../backend/navigation/navigation_type.dart';
 import '../../../configs/constants.dart';
 import '../../../utils/app_colors.dart';
+import '../../../utils/my_safe_state.dart';
 import '../../common/components/common_button.dart';
-import '../../common/components/common_cachednetwork_image.dart';
 import '../../common/components/common_popup.dart';
 import '../../common/components/common_progress_indicator.dart';
 import '../../common/components/common_text.dart';
 import '../../common/components/header_widget.dart';
 import '../../common/components/modal_progress_hud.dart';
 
-class CaseOfMonthScreenNavigator extends StatefulWidget {
-  const CaseOfMonthScreenNavigator({Key? key}) : super(key: key);
+class PhotoGalleryScreenNavigator extends StatefulWidget {
+  const PhotoGalleryScreenNavigator({Key? key}) : super(key: key);
 
   @override
-  _CaseOfMonthScreenNavigatorState createState() => _CaseOfMonthScreenNavigatorState();
+  _PhotoGalleryScreenNavigatorState createState() => _PhotoGalleryScreenNavigatorState();
 }
 
-class _CaseOfMonthScreenNavigatorState extends State<CaseOfMonthScreenNavigator>  {
+class _PhotoGalleryScreenNavigatorState extends State<PhotoGalleryScreenNavigator>  {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: NavigationController.caseOfMonthScreenNavigator,
-      onGenerateRoute: NavigationController.onCaseOfMonthGeneratedRoutes,
+      key: NavigationController.photoGalleryScreenNavigator,
+      onGenerateRoute: NavigationController.onPhotoGalleryGeneratedRoutes,
     );
   }
 }
 
-class CaseOfMonthList extends StatefulWidget {
-  const CaseOfMonthList({super.key});
+class PhotoGalleryScreen extends StatefulWidget {
+  const PhotoGalleryScreen({super.key});
 
   @override
-  State<CaseOfMonthList> createState() => _CaseOfMonthListState();
+  State<PhotoGalleryScreen> createState() => _PhotoGalleryScreenState();
 }
 
-class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
+class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> with MySafeState {
   ScrollController scrollController = ScrollController();
   bool isLoading = false;
 
-  late CaseOfMonthProvider caseOfMonthProvider;
-  late CaseOfMonthController caseOfMonthController;
+  late PhotoGalleryProvider photoGalleryProvider;
+  late PhotoGalleryController brochureController;
 
   Future<void> getData({bool isRefresh = true, bool isFromCache = false, bool isNotify = true}) async {
-    await caseOfMonthController.getCaseOfMonthPaginatedList(
+    await brochureController.getPhotoGalleryPaginatedList(
       isRefresh: isRefresh,
       isFromCache: isFromCache,
       isNotify: isNotify,
@@ -63,8 +64,8 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
   @override
   void initState() {
     super.initState();
-    caseOfMonthProvider = Provider.of<CaseOfMonthProvider>(context, listen: false);
-    caseOfMonthController = CaseOfMonthController(caseOfMonthProvider: caseOfMonthProvider);
+    photoGalleryProvider = Provider.of<PhotoGalleryProvider>(context, listen: false);
+    brochureController = PhotoGalleryController(photoGalleryProvider: photoGalleryProvider);
 
     getData(
       isRefresh: true,
@@ -89,20 +90,20 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
         child: Column(
           children: [
             HeaderWidget(
-              title: "Case Of Month",
+              title: "Photo Gallery",
               suffixWidget: CommonButton(
-                text: "Add Case Of Month",
+                text: "Add Photo Gallery",
                 icon: Icon(
                   Icons.add,
                   color: AppColor.white,
                 ),
                 onTap: () async {
-                  await NavigationController.navigateToAddCaseOfMonthScreen(
+                  await NavigationController.navigateToAddPhotoGalleryScreen(
                       navigationOperationParameters: NavigationOperationParameters(
                         navigationType: NavigationType.pushNamed,
                         context: context,
                       ),
-                      addCourseScreenNavigationArguments: AddCaseOfMonthScreenNavigationArguments());
+                      addPhotoGalleryScreenNavigationArguments: AddPhotoGalleryNavigationArguments());
                   // getData(
                   //   isRefresh: true,
                   //   isFromCache: false,
@@ -120,12 +121,12 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
   }
 
   Widget getCourseList({required BuildContext topContext}) {
-    return Consumer(builder: (BuildContext context, CaseOfMonthProvider caseOfMonthProvider, Widget? child) {
-      if (caseOfMonthProvider.isCaseOfMonthFirstTimeLoading.get()) {
+    return Consumer(builder: (BuildContext context, PhotoGalleryProvider photoGalleryProvider, Widget? child) {
+      if (photoGalleryProvider.isPhotoGalleryFirstTimeLoading.get()) {
         return const Center(child: CommonProgressIndicator());
       }
 
-      if (!caseOfMonthProvider.isCaseOfMonthLoading.get() && caseOfMonthProvider.allCaseOfMonthLength == 0) {
+      if (!photoGalleryProvider.isPhotoGalleryLoading.get() && photoGalleryProvider.photoGalleryModelLength == 0) {
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return RefreshIndicator(
@@ -141,7 +142,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
                 children: [
                   SizedBox(height: constraints.maxHeight / 2.05),
                   const Center(
-                    child: Text("No Case of Month"),
+                    child: Text("No Photo Albums"),
                   ),
                 ],
               ),
@@ -150,7 +151,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
         );
       }
 
-      List<CaseOfMonthModel> caseOfMonth = caseOfMonthProvider.caseOfMonthList.getList(isNewInstance: false);
+      List<GalleryModel> photoGalleryList = photoGalleryProvider.photoGalleryModelList.getList(isNewInstance: false);
 
       double? cacheExtent = scrollController.hasClients ? scrollController.position.maxScrollExtent : null;
       // MyPrint.printOnConsole("cacheExtent:$cacheExtent");
@@ -167,10 +168,10 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
           controller: scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           cacheExtent: cacheExtent,
-          itemCount: caseOfMonth.length + 1,
+          itemCount: photoGalleryList.length + 1,
           itemBuilder: (BuildContext context, int index) {
-            if ((index == 0 && caseOfMonth.isEmpty) || (index == caseOfMonth.length)) {
-              if (caseOfMonthProvider.isCaseOfMonthLoading.get()) {
+            if ((index == 0 && photoGalleryList.isEmpty) || (index == photoGalleryList.length)) {
+              if (photoGalleryProvider.isPhotoGalleryLoading.get()) {
                 // if(true) {
                 return const CommonProgressIndicator();
               } else {
@@ -178,13 +179,13 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
               }
             }
 
-            if (caseOfMonthProvider.hasMoreCaseOfMonth.get() && index > (caseOfMonth.length - AppConstants.coursesRefreshLimitForPagination)) {
+            if (photoGalleryProvider.hasMorePhotoGallery.get() && index > (photoGalleryList.length - AppConstants.coursesRefreshLimitForPagination)) {
               WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                caseOfMonthController.getCaseOfMonthPaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
+                brochureController.getPhotoGalleryPaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
               });
             }
 
-            CaseOfMonthModel model = caseOfMonth[index];
+            GalleryModel model = photoGalleryList[index];
 
             return singleCourse(model, index, topContext);
           },
@@ -193,8 +194,8 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
     });
   }
 
-  Widget singleCourse(CaseOfMonthModel caseOfMonthModel, int index, BuildContext topContext) {
-    MyPrint.printOnConsole("image urllll: ${caseOfMonthModel.image}");
+  Widget singleCourse(GalleryModel photoGalleryModel, int index, BuildContext topContext) {
+    MyPrint.printOnConsole("photoGalleryModel.imageList : ${photoGalleryModel.eventName } : ${photoGalleryModel.imageList.length}");
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: InkWell(
@@ -203,17 +204,17 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Want to Edit course?",
+                text: "Want to Edit Photo Gallery?",
                 rightText: "Yes",
                 rightOnTap: () async {
                   Navigator.pop(context);
-                  await NavigationController.navigateToAddCaseOfMonthScreen(
+                  await NavigationController.navigateToAddPhotoGalleryScreen(
                     navigationOperationParameters: NavigationOperationParameters(
                       navigationType: NavigationType.pushNamed,
                       context: topContext,
                     ),
-                    addCourseScreenNavigationArguments: AddCaseOfMonthScreenNavigationArguments(
-                      caseOfMonthModel: caseOfMonthModel,
+                    addPhotoGalleryScreenNavigationArguments: AddPhotoGalleryNavigationArguments(
+                      galleryModel: photoGalleryModel,
                       index: index,
                       isEdit: true,
                     ),
@@ -234,63 +235,35 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
           ),
           child: Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: AppColor.bgSideMenu.withOpacity(.6)),
-                ),
-                // child: Image.network(
-                //   eventModel.imageUrl,
-                //   height: 80,
-                //   width: 80,
-                // ),
-                child: CommonCachedNetworkImage(
-                  imageUrl: caseOfMonthModel.image,
-                  height: 80,
-                  width: 80,
-                  borderRadius: 4,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      text: photoGalleryModel.eventName,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: photoGalleryModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(photoGalleryModel.createdTime!.toDate())}',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CommonText(
-                    text: caseOfMonthModel.caseName,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  const SizedBox(height: 10),
-                  CommonText(
-                    text: caseOfMonthModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(caseOfMonthModel.createdTime!.toDate())}',
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    textOverFlow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-              const SizedBox(width: 20),
-              const Spacer(),
-              // InkWell(
-              //   onTap: (){},
-              //   child: Tooltip(
-              //     message: 'Copy New Game',
-              //     child: Padding(
-              //       padding: const EdgeInsets.all(5.0),
-              //       child: Icon(Icons.copy,color: AppColor.bgSideMenu),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(width: 20),
-              // getTestEnableSwitch(
-              //   value: eventModel.enabled,
-              //   onChanged: (val) {
-              //     Map<String, dynamic> data = {
-              //       "enabled": val,
-              //     };
-              //     // eventController.enableDisableCourseInFirebase(editableData: data, id: courseModel.id, listIndex: index);
-              //   },
-              // ),
+              Expanded(
+                child: Wrap(
+                  spacing: 10,
+                  alignment: WrapAlignment.end,
+                  children: photoGalleryModel.imageList.map((e) {
+                    MyPrint.printOnConsole("Helloe : ${e}");
+                    return CommonCachedNetworkImage(imageUrl: e, height: 50,width: 50, borderRadius: 10,);
+                  }).toList(),
+                ),
+              )
             ],
           ),
         ),

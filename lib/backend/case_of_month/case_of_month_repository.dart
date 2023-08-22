@@ -34,8 +34,8 @@ class CaseOfMonthRepository {
     return courseList;
   }
 
-  Future<void> addCaseOfMonthRepo(CaseOfMonthModel eventModel) async {
-    await FirebaseNodes.eventsDocumentReference(courseId: eventModel.id).set(eventModel.toMap());
+  Future<void> addCaseOfMonthRepo(CaseOfMonthModel caseOfMonthModel) async {
+    await FirebaseNodes.caseOfMonthDocumentReference(courseId: caseOfMonthModel.id).set(caseOfMonthModel.toMap());
   }
 
   Future<List<CaseOfMonthModel>> getCoursesListFromIdsList({required List<String> courseIds}) async {

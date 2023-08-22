@@ -1,10 +1,9 @@
+
 import 'dart:typed_data';
 
-import 'package:baroda_chest_group_admin/backend/case_of_month/case_of_month_provider.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
+import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_controller.dart';
+import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_provider.dart';
+import 'package:baroda_chest_group_admin/models/profile/data_model/committee_member_model.dart';
 import 'package:baroda_chest_group_admin/utils/extensions.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,11 +12,12 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../backend/case_of_month/case_of_month_controller.dart';
 import '../../../backend/common/firebase_storage_controller.dart';
+import '../../../backend/member/member_controller.dart';
+import '../../../backend/member/member_provider.dart';
 import '../../../backend/navigation/navigation_arguments.dart';
+import '../../../models/profile/data_model/member_model.dart';
 import '../../../utils/app_colors.dart';
-import '../../../utils/date_presentation.dart';
 import '../../../utils/my_print.dart';
 import '../../../utils/my_toast.dart';
 import '../../../utils/my_utils.dart';
@@ -30,46 +30,45 @@ import '../../common/components/get_title.dart';
 import '../../common/components/header_widget.dart';
 import '../../common/components/modal_progress_hud.dart';
 
-class AddCaseOfMonthScreen extends StatefulWidget {
-  static const String routeName = "/addcaseofmonth";
-  final AddCaseOfMonthScreenNavigationArguments arguments;
+class AddCommitteeMemberScreen extends StatefulWidget {
+  static const String routeName = "/addcommitteemember";
+  final AddCommitteeMemberScreenNavigationArguments arguments;
 
-  const AddCaseOfMonthScreen({super.key, required this.arguments});
+  const AddCommitteeMemberScreen({super.key, required this.arguments});
 
   @override
-  State<AddCaseOfMonthScreen> createState() => _AddCaseOfMonthScreenState();
+  State<AddCommitteeMemberScreen> createState() => _AddCommitteeMemberScreenState();
 }
 
-class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafeState {
+class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> with MySafeState {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isLoading = false;
-  bool isCourseEnabled = true;
 
   late Future<void> futureGetData;
-  late CaseOfMonthProvider caseOfMonthProvider;
-  late CaseOfMonthController caseOfMonthController;
-  DateTime? eventStartDate, eventEndDate;
+  late CommitteeMemberProvider committeeMemberProvider;
+  late CommitteeMemberController committeeMemberController;
 
-  TextEditingController eventCaseNameController = TextEditingController();
-  TextEditingController googleDriveUrlController = TextEditingController();
-  TextEditingController eventDescriptionController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController designationController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  String? selectedType;
 
   String? thumbnailImageUrl;
   Uint8List? thumbnailImage;
   String? thumbnailImageName;
 
-  CaseOfMonthModel? pageCourseModel;
+
+  CommitteeMemberModel? pageCommitteeMemberModel;
 
   Future<void> getData() async {
-    if (widget.arguments.caseOfMonthModel != null) {
-      pageCourseModel = widget.arguments.caseOfMonthModel;
+    if (widget.arguments.committeeMemberModel != null) {
+      pageCommitteeMemberModel = widget.arguments.committeeMemberModel;
     }
 
-    if (pageCourseModel != null) {
-      eventCaseNameController.text = pageCourseModel!.caseName;
-      eventDescriptionController.text = pageCourseModel!.description;
-      thumbnailImageUrl = pageCourseModel!.image;
-      googleDriveUrlController.text = pageCourseModel!.downloadUrl;
+    if (pageCommitteeMemberModel != null) {
+      nameController.text = pageCommitteeMemberModel!.name;
+      addressController.text = pageCommitteeMemberModel!.type;
     }
   }
 
@@ -137,12 +136,12 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     return firebaseStorageImageUrl;
   }
 
-  Future<void> addCaseOfMonthToFirebase() async {
+  Future<void> addCommitteeMemberToFirebase() async {
     setState(() {
       isLoading = true;
     });
 
-    String courseId = pageCourseModel?.id ?? "";
+    String courseId = pageCommitteeMemberModel?.id ?? "";
     if (courseId.isEmpty) {
       courseId = MyUtils.getNewId(isFromUUuid: false);
     }
@@ -157,43 +156,42 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       return;
     }
 
-    CaseOfMonthModel caseOfMonthModel = CaseOfMonthModel(
+    CommitteeMemberModel memberModel = CommitteeMemberModel(
       id: courseId.trim(),
-      caseName: eventCaseNameController.text.trim(),
-      description: eventDescriptionController.text.trim(),
-      image: thumbnailImageUrl!.trim(),
-      createdTime: pageCourseModel?.createdTime ?? Timestamp.now(),
-      updatedTime: pageCourseModel != null ? Timestamp.now() : null,
+      name: nameController.text.trim(),
+      type: selectedType ?? "",
+      profileUrl: thumbnailImageUrl!.trim(),
+      createdTime: pageCommitteeMemberModel?.createdTime ?? Timestamp.now(),
+      // updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
 
-    await caseOfMonthController.addCaseOfMonthToFirebase(
-      caseOfMonth: caseOfMonthModel,
-      isAdInProvider: pageCourseModel == null,
+    await committeeMemberController.addCommitteeMemberToFirebase(
+      committeeMemberModel: memberModel,
+      isAdInProvider: pageCommitteeMemberModel == null,
     );
-    MyPrint.printOnConsole('Added Course Model is ${caseOfMonthModel.toMap()}');
+    MyPrint.printOnConsole('Added Member Model is ${memberModel.toMap()}');
 
-    if (pageCourseModel != null) {
-      CaseOfMonthModel model = pageCourseModel!;
-      model.caseName = caseOfMonthModel.caseName;
-      model.description = caseOfMonthModel.description;
-      model.image = caseOfMonthModel.image;
-      model.createdTime = caseOfMonthModel.createdTime;
-      model.updatedTime = caseOfMonthModel.updatedTime;
+    if (pageCommitteeMemberModel != null) {
+      CommitteeMemberModel model = pageCommitteeMemberModel!;
+      model.name = memberModel.name;
+      model.type = memberModel.type;
+      model.profileUrl = model.profileUrl;
+      model.createdTime = memberModel.createdTime;
     }
 
     setState(() {
       isLoading = false;
     });
     if (context.mounted && context.checkMounted()) {
-      MyToast.showSuccess(context: context, msg: pageCourseModel == null ? 'Case Of Month Added Successfully' : 'Case Of Month Edited Successfully');
+      MyToast.showSuccess(context: context, msg: pageCommitteeMemberModel == null ? 'Member Added Successfully' : 'Member Edited Successfully');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    caseOfMonthProvider = Provider.of<CaseOfMonthProvider>(context, listen: false);
-    caseOfMonthController = CaseOfMonthController(caseOfMonthProvider: caseOfMonthProvider);
+    committeeMemberProvider = Provider.of<CommitteeMemberProvider>(context, listen: false);
+    committeeMemberController = CommitteeMemberController(committeeMemberProvider: committeeMemberProvider);
     futureGetData = getData();
   }
 
@@ -201,7 +199,7 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
   Widget build(BuildContext context) {
     super.pageBuild();
 
-    MyPrint.printOnConsole("pageCourseModel?.id:${pageCourseModel?.id}");
+    MyPrint.printOnConsole("pageCourseModel?.id:${pageCommitteeMemberModel?.id}");
 
     return FutureBuilder(
       future: futureGetData,
@@ -216,18 +214,16 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
                 key: _formKey,
                 child: Column(
                   children: [
-                    HeaderWidget(title: pageCourseModel == null ? "Add Case Of Month" : "Edit Case Of Month", isBackArrow: true),
+                    HeaderWidget(title: pageCommitteeMemberModel == null ? "Add Committee Member" : "Edit Committee Member", isBackArrow: true),
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            getCaseName(),
+                            getName(),
                             const SizedBox(height: 20),
-                            getDownloadUrlField(),
-                            const SizedBox(height: 20),
-                            getDescriptionTextField(),
+                            getDropDownForType(),
                             const SizedBox(height: 20),
                             chooseThumbnailImageAndBackgroundColor(),
                             const SizedBox(height: 30),
@@ -249,7 +245,7 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     );
   }
 
-  Widget getCaseName() {
+  Widget getName() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -258,13 +254,13 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GetTitle(title: "Enter Case Name*"),
+              GetTitle(title: "Enter Name*"),
               CommonTextFormField(
-                controller: eventCaseNameController,
-                hintText: "Enter Case Name",
+                controller: nameController,
+                hintText: "Enter Name",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "  Please enter Case Name";
+                    return "  Please enter Name";
                   }
                   return null;
                 },
@@ -272,13 +268,11 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             ],
           ),
         ),
-        const SizedBox(width: 20),
-        Expanded(child: Container()),
       ],
     );
   }
 
-  Widget getDownloadUrlField() {
+  Widget getDesignationUrlField() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -287,13 +281,13 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GetTitle(title: "Enter Google drive url"),
+              GetTitle(title: "Enter designation"),
               CommonTextFormField(
-                controller: googleDriveUrlController,
-                hintText: "Enter Google Drive Url",
+                controller: designationController,
+                hintText: "Enter designation",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "  Please enter Google Drive Url";
+                    return "  Please enter designation";
                   }
                   return null;
                 },
@@ -301,21 +295,19 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             ],
           ),
         ),
-        const SizedBox(width: 20),
-        Expanded(child: Container()),
       ],
     );
   }
 
-  Widget getDescriptionTextField() {
+  Widget getAddressTextField() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Enter description of event"),
+        GetTitle(title: "Enter address "),
         CommonTextFormField(
-          controller: eventDescriptionController,
-          hintText: "Enter description of event",
+          controller: addressController,
+          hintText: "Enter address",
           minLines: 3,
           maxLines: 10,
           validator: (value) {
@@ -326,28 +318,21 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     );
   }
 
-  Widget chooseThumbnailImageAndBackgroundColor() {
+  Widget getEmailTextField() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Choose Case Of Month Thumbnail Image"),
-        thumbnailImage == null && thumbnailImageUrl == null && (thumbnailImageUrl?.isEmpty ?? true)
-            ? InkWell(
-                onTap: () async {
-                  await addThumbnailImage();
-                },
-                child: const EmptyImageViewBox(),
-              )
-            : CommonImageViewBox(
-                imageAsBytes: thumbnailImage,
-                url: thumbnailImageUrl,
-                rightOnTap: () {
-                  thumbnailImage = null;
-                  thumbnailImageUrl = null;
-                  setState(() {});
-                },
-              ),
+        GetTitle(title: "Enter email "),
+        CommonTextFormField(
+          controller: emailController,
+          hintText: "Enter email",
+          minLines: 3,
+          maxLines: 10,
+          validator: (value) {
+            return null;
+          },
+        ),
       ],
     );
   }
@@ -356,16 +341,11 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     return CommonButton(
       onTap: () async {
         if (_formKey.currentState!.validate()) {
-          if (thumbnailImage == null && thumbnailImageUrl.checkEmpty) {
-            MyToast.showError(context: context, msg: 'Please upload a course thumbnail image');
-            return;
-          }
-
           dynamic newValue = await showDialog(
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this chapter?",
+                text: "Are you sure want to ${pageCommitteeMemberModel == null ? "Add" : "Edit"} this member?",
                 leftText: "No",
                 rightText: "Yes",
                 rightOnTap: () {
@@ -380,13 +360,91 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             return;
           }
 
-          await addCaseOfMonthToFirebase();
+          await addCommitteeMemberToFirebase();
           // ignore: use_build_context_synchronously
           Navigator.pop(context);
         }
       },
-      text: pageCourseModel == null ? '+   Add Case Of Month ' : '+   Edit Case Of Month',
+      text: pageCommitteeMemberModel == null ? '+   Add Member ' : '+   Edit Member',
       fontSize: 17,
     );
   }
+
+  Widget getDropDownForType(){
+    return Card(
+      color: Colors.grey[50],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      elevation: 2,
+      child: DropdownButtonFormField<String>(
+
+        decoration: InputDecoration(
+          filled: true,
+          hintText: 'Select type',
+          hintStyle: const TextStyle(
+            color: Colors.grey,
+            fontSize: 15,
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 21),
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.transparent),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.transparent),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Colors.black.withOpacity(.75),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          border: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.transparent),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        items: <String>['Patron', 'President', 'Vice President', 'Secretary', 'Treasurer', 'Member Radiology', 'Social Media'].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        value: selectedType,
+        onChanged: (String? value) {
+          if(value != null){
+            selectedType = value;
+          }
+        },
+      ),
+    );
+  }
+
+  Widget chooseThumbnailImageAndBackgroundColor() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GetTitle(title: "Choose Profile Image"),
+        thumbnailImage == null && thumbnailImageUrl == null && (thumbnailImageUrl?.isEmpty ?? true)
+            ? InkWell(
+          onTap: () async {
+            await addThumbnailImage();
+          },
+          child: const EmptyImageViewBox(),
+        )
+            : CommonImageViewBox(
+          imageAsBytes: thumbnailImage,
+          url: thumbnailImageUrl,
+          rightOnTap: () {
+            thumbnailImage = null;
+            thumbnailImageUrl = null;
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
 }
