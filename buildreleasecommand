@@ -1,0 +1,6 @@
+To Build Web Release :- flutter build web --release --web-renderer canvaskit --no-tree-shake-icons
+To Run Web Release :- flutter run -d chrome --release --web-renderer canvaskit
+To Run Web Server :- flutter run -d web-server --web-port 8080 --web-hostname 0.0.0.0 --web-renderer canvaskit
+
+
+firebase hosting:channel:deploy preview_name

@@ -103,7 +103,7 @@ class _AddPhotoGalleryScreenState extends State<AddPhotoGalleryScreen> with MySa
     String? firebaseStorageImageUrl;
     String finalFileName = MyUtils().getStorageUploadImageUrl(nativeImageName: imageName);
     if (image != null) {
-      firebaseStorageImageUrl = await FireBaseStorageController().uploadFilesToFireBaseStorage(data: image, eventId: courseId, fileName: finalFileName);
+      firebaseStorageImageUrl = await FireBaseStorageController().uploadFilesToFireBaseStorage(data: image, eventId: courseId, fileName: finalFileName, folderName: "photoGallery/");
       MyPrint.printOnConsole("Method after await");
     }
     return firebaseStorageImageUrl;
@@ -314,7 +314,7 @@ class _AddPhotoGalleryScreenState extends State<AddPhotoGalleryScreen> with MySa
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Choose Case Of Month Thumbnail Image"),
+        GetTitle(title: "Choose multiple photos for this album"),
         thumbnailImage.isEmpty && thumbnailImageUrl.isEmpty && (thumbnailImageUrl.isEmpty ?? true)
             ? InkWell(
                 onTap: () async {

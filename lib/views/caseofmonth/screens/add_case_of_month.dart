@@ -151,17 +151,13 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       thumbnailImageUrl = await uploadFileToFirebaseStorage(courseId: courseId, imageName: thumbnailImageName!);
     }
 
-    if (thumbnailImageUrl == null) {
-      // ignore: use_build_context_synchronously
-      MyToast.showError(context: context, msg: 'There is some issue in uploading course image. Kindly try again!');
-      return;
-    }
+
 
     CaseOfMonthModel caseOfMonthModel = CaseOfMonthModel(
       id: courseId.trim(),
       caseName: eventCaseNameController.text.trim(),
       description: eventDescriptionController.text.trim(),
-      image: thumbnailImageUrl!.trim(),
+      image: thumbnailImageUrl?.trim() ?? "",
       createdTime: pageCourseModel?.createdTime ?? Timestamp.now(),
       updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
@@ -356,10 +352,10 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     return CommonButton(
       onTap: () async {
         if (_formKey.currentState!.validate()) {
-          if (thumbnailImage == null && thumbnailImageUrl.checkEmpty) {
-            MyToast.showError(context: context, msg: 'Please upload a course thumbnail image');
-            return;
-          }
+          // if (thumbnailImage == null && thumbnailImageUrl.checkEmpty) {
+          //   MyToast.showError(context: context, msg: 'Please upload a course thumbnail image');
+          //   return;
+          // }
 
           dynamic newValue = await showDialog(
             context: context,

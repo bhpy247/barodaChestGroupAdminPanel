@@ -10,13 +10,14 @@ class FireBaseStorageController {
     required Uint8List data,
     required String eventId,
     required String fileName,
+    String folderName = "event/"
   }) async {
     String? imageUrl;
 
     try {
       String? mimeType = lookupMimeType(fileName); // 'image/jpeg'
 
-      final storageRef = FirebaseStorage.instance.ref("event/").child("$eventId/$fileName");
+      final storageRef = FirebaseStorage.instance.ref(folderName).child("$eventId/$fileName");
       await storageRef.putData(data, SettableMetadata(contentType: mimeType));
       imageUrl = await storageRef.getDownloadURL();
       return imageUrl;
