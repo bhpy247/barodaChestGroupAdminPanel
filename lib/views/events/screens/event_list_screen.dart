@@ -255,45 +255,27 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
                 ),
               ),
               const SizedBox(width: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CommonText(
-                    text: eventModel.title,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  const SizedBox(height: 10),
-                  CommonText(
-                    text: eventModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(eventModel.createdTime!.toDate())}',
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    textOverFlow: TextOverflow.ellipsis,
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      text: eventModel.title,
+                      fontSize: 20,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: eventModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(eventModel.createdTime!.toDate())}',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 20),
-              const Spacer(),
-              // InkWell(
-              //   onTap: (){},
-              //   child: Tooltip(
-              //     message: 'Copy New Game',
-              //     child: Padding(
-              //       padding: const EdgeInsets.all(5.0),
-              //       child: Icon(Icons.copy,color: AppColor.bgSideMenu),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(width: 20),
-              // getTestEnableSwitch(
-              //   value: eventModel.enabled,
-              //   onChanged: (val) {
-              //     Map<String, dynamic> data = {
-              //       "enabled": val,
-              //     };
-              //     // eventController.enableDisableCourseInFirebase(editableData: data, id: courseModel.id, listIndex: index);
-              //   },
-              // ),
             ],
           ),
         ),

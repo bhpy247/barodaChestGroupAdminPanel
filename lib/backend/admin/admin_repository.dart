@@ -29,4 +29,27 @@ class AdminRepository {
 
     return propertyModel;
   }
+  Future<bool> updatePropertyData(Map<String, dynamic> updateMap) async {
+    bool isSuccess = false;
+    String tag = MyUtils.getUniqueIdFromUuid();
+    MyPrint.printOnConsole("AdminRepository().getPropertyData() called", tag: tag);
+
+    PropertyModel? propertyModel;
+
+    try {
+      await FirebaseNodes.adminPropertyDocumentReference.update(updateMap).then((value) {
+        isSuccess = true;
+      });
+      MyPrint.printOnConsole("isSuccess:${isSuccess}", tag: tag);
+
+
+      return isSuccess;
+    }
+    catch(e, s) {
+      MyPrint.printOnConsole("Error in getting PropertyModel in AdminRepository().updatePropertyData():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+    }
+
+    return false;
+  }
 }

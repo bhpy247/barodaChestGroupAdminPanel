@@ -1,3 +1,4 @@
+import 'package:baroda_chest_group_admin/views/banner/screen/banner_list_screen.dart';
 import 'package:baroda_chest_group_admin/views/brochure/screens/brochure_list.dart';
 import 'package:baroda_chest_group_admin/views/caseofmonth/screens/case_of_month_list.dart';
 import 'package:baroda_chest_group_admin/views/committeeMember/screens/committee_member_list.dart';
@@ -115,6 +116,14 @@ class _HomePageState extends State<HomePage> {
               tabNumber = 7;
             });
           },
+        ),DrawerListTile(
+          title: "Banners",
+          icon: MdiIcons.imageAlbum,
+          press: () {
+            setState(() {
+              tabNumber = 8;
+            });
+          },
         ),
       ]),
       key: Provider.of<MenuProvider>(context, listen: false).scaffoldKey,
@@ -198,15 +207,15 @@ class _HomePageState extends State<HomePage> {
                         });
                       },
                     ),
-                    // DrawerListTile(
-                    //   title: "Subscriptions",
-                    //   icon: Icons.dashboard,
-                    //   press: () {
-                    //     setState(() {
-                    //       tabNumber=4;
-                    //     });
-                    //   },
-                    // ),
+                    DrawerListTile(
+                      title: "Banners",
+                      icon: Icons.library_books_outlined,
+                      press: () {
+                        setState(() {
+                          tabNumber=8;
+                        });
+                      },
+                    ),
                     /*DrawerListTile(
                       title: "System",
                       icon: Icons.library_books_outlined,
@@ -272,6 +281,9 @@ class _HomePageState extends State<HomePage> {
       case 7:
         {
           return const ContactUsScreenNavigator();
+        } case 8:
+        {
+          return const BannerScreen();
         }
 
       // case 4:{

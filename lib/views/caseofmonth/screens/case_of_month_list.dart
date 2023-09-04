@@ -89,7 +89,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
         child: Column(
           children: [
             HeaderWidget(
-              title: "Case Of Month",
+              title: "Case Of Months",
               suffixWidget: CommonButton(
                 text: "Add Case Of Month",
                 icon: Icon(

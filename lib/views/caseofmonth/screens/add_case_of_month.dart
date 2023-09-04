@@ -80,44 +80,44 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       source: ImageSource.gallery,
     );
     if (pickedFile != null) {
-      String path = pickedFile.path;
-      CroppedFile? croppedFile = await ImageCropper().cropImage(
-        compressFormat: ImageCompressFormat.jpg,
-        sourcePath: path,
-        aspectRatio: const CropAspectRatio(ratioX: 9, ratioY: 16),
-        cropStyle: CropStyle.rectangle,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
-            toolbarColor: AppColor.bgSideMenu,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.square,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            minimumAspectRatio: 1.0,
-            aspectRatioLockEnabled: true,
-            aspectRatioPickerButtonHidden: true,
-          ),
-          // ignore: use_build_context_synchronously
-          WebUiSettings(
-            context: context,
-            presentStyle: CropperPresentStyle.dialog,
-            boundary: const CroppieBoundary(
-              width: 530,
-              height: 330,
-            ),
-            viewPort: const CroppieViewPort(width: 400, height: 225, type: 'rectangular'),
-            enableOrientation: true,
-            enableExif: true,
-            enableZoom: true,
-            showZoomer: true,
-          ),
-        ],
-      );
-      if (croppedFile != null) {
-        thumbnailImage = await croppedFile.readAsBytes();
-      }
+      // String path = pickedFile.path;
+      // CroppedFile? croppedFile = await ImageCropper().cropImage(
+      //   compressFormat: ImageCompressFormat.jpg,
+      //   sourcePath: path,
+      //   aspectRatio: const CropAspectRatio(ratioX: 9, ratioY: 16),
+      //   cropStyle: CropStyle.rectangle,
+      //   uiSettings: [
+      //     AndroidUiSettings(
+      //       toolbarTitle: 'Crop Image',
+      //       toolbarColor: AppColor.bgSideMenu,
+      //       toolbarWidgetColor: Colors.white,
+      //       initAspectRatio: CropAspectRatioPreset.square,
+      //       lockAspectRatio: true,
+      //     ),
+      //     IOSUiSettings(
+      //       minimumAspectRatio: 1.0,
+      //       aspectRatioLockEnabled: true,
+      //       aspectRatioPickerButtonHidden: true,
+      //     ),
+      //     // ignore: use_build_context_synchronously
+      //     WebUiSettings(
+      //       context: context,
+      //       presentStyle: CropperPresentStyle.dialog,
+      //       // boundary: const CroppieBoundary(
+      //       //   width: 530,
+      //       //   height: 330,
+      //       // ),
+      //       viewPort: const CroppieViewPort(width: 400, height: 225, type: 'rectangular'),
+      //       enableOrientation: true,
+      //       enableExif: true,
+      //       enableZoom: true,
+      //       showZoomer: true,
+      //     ),
+      //   ],
+      // );
+      // if (croppedFile != null) {
+        thumbnailImage = await pickedFile.readAsBytes();
+      // }
       thumbnailImageName = pickedFile.name;
 
       if (mounted) setState(() {});

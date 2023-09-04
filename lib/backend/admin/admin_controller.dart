@@ -41,6 +41,39 @@ class AdminController {
     MyPrint.printOnConsole("Final propertyModel:${adminProvider.propertyModel.get()}", tag: tag);
   }
 
+  Future<void> updatePropertyDataAndSetInProvider() async {
+    String tag = MyUtils.getUniqueIdFromUuid();
+    MyPrint.printOnConsole("AdminController().getPropertyDataAndSetInProvider() called", tag: tag);
+
+    try {
+      PropertyModel? propertyModel = await adminRepository.getPropertyData();
+
+      adminProvider.propertyModel.set(value: propertyModel);
+    } catch (e, s) {
+      MyPrint.printOnConsole("Error in getting PropertyModel in AdminRepository().getPropertyData():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+    }
+
+    MyPrint.printOnConsole("Final propertyModel:${adminProvider.propertyModel.get()}", tag: tag);
+  }
+
+  Future<void> updateBannerImage(PropertyModel propertyModel) async {
+    String tag = MyUtils.getUniqueIdFromUuid();
+    MyPrint.printOnConsole("AdminController().updateBannerImage() called", tag: tag);
+
+    try {
+      bool isSuccess = await adminRepository.updatePropertyData(propertyModel.toMap());
+      if(isSuccess) {
+        adminProvider.propertyModel.set(value: propertyModel);
+      }
+    } catch (e, s) {
+      MyPrint.printOnConsole("Error in getting PropertyModel in AdminRepository().getPropertyData():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+    }
+
+    MyPrint.printOnConsole("Final propertyModel:${adminProvider.propertyModel.get()}", tag: tag);
+  }
+
   Future<void> getNewTimestampAndSaveInProvider() async {
     String tag = MyUtils.getNewId();
     MyPrint.printOnConsole("AdminController().getNewTimestampAndSaveInProvider() called", tag: tag);
