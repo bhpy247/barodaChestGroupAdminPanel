@@ -13,6 +13,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/my_print.dart';
+import '../../views/academic_connect/screens/academic_connect_list_screen.dart';
+import '../../views/academic_connect/screens/add_academic_connect.dart';
 import '../../views/authentication/screens/login_screen.dart';
 import '../../views/committeeMember/screens/add_committee_member.dart';
 import '../../views/common/screens/splash_screen.dart';
@@ -50,6 +52,7 @@ class NavigationController {
   static final GlobalKey<NavigatorState> photoGalleryScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> memberScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> committeeMemberScreenNavigator = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> academicConnectScreenNavigator = GlobalKey<NavigatorState>();
   // static final GlobalKey<NavigatorState> photoGalleryScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> userScreenNavigator = GlobalKey<NavigatorState>();
 
@@ -456,6 +459,44 @@ class NavigationController {
     return null;
   }
 
+  static Route? onAcademicConnectGeneratedRoutes(RouteSettings settings) {
+    MyPrint.printOnConsole("Event Generated Routes called for ${settings.name} with arguments:${settings.arguments}");
+
+    if (kIsWeb) {
+      if (!["/", SplashScreen.routeName].contains(settings.name) && NavigationController.checkDataAndNavigateToSplashScreen()) {
+        return null;
+      }
+    }
+
+    MyPrint.printOnConsole("First Page:$isFirst");
+    Widget? page;
+
+    switch (settings.name) {
+      case "/":
+        {
+          page = const AcademicConnectListScreen();
+          break;
+        }
+
+      case AddAcademicConnect.routeName:
+        {
+          page = parseAddAcademicConnectScreen(settings: settings);
+          break;
+        }
+    }
+
+    if (page != null) {
+      return PageRouteBuilder(
+        pageBuilder: (c, a1, a2) => page!,
+        //transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
+        transitionsBuilder: (c, anim, a2, child) => SizeTransition(sizeFactor: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 0),
+        settings: settings,
+      );
+    }
+    return null;
+  }
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   //region Parse Page From RouteSettings
@@ -472,6 +513,17 @@ class NavigationController {
     if (settings.arguments is AddCourseScreenNavigationArguments) {
       AddCourseScreenNavigationArguments arguments = settings.arguments as AddCourseScreenNavigationArguments;
       return AddCourse(
+        arguments: arguments,
+      );
+    } else {
+      return null;
+    }
+  }
+
+  static Widget? parseAddAcademicConnectScreen({required RouteSettings settings}) {
+    if (settings.arguments is AddAcademicConnectScreenNavigationArguments) {
+      AddAcademicConnectScreenNavigationArguments arguments = settings.arguments as AddAcademicConnectScreenNavigationArguments;
+      return AddAcademicConnect(
         arguments: arguments,
       );
     } else {
@@ -657,6 +709,18 @@ class NavigationController {
       navigationOperationParameters: navigationOperationParameters.copyWith(
         routeName: UserProfileView.routeName,
         arguments: userProfileViewScreenNavigationArguments,
+      ),
+    );
+  }
+
+  static Future<dynamic> navigateToAddAcademicConnectScreen({
+    required NavigationOperationParameters navigationOperationParameters,
+    required AddAcademicConnectScreenNavigationArguments academicConnectScreenNavigationArguments,
+  }) {
+    return NavigationOperation.navigate(
+      navigationOperationParameters: navigationOperationParameters.copyWith(
+        routeName: AddAcademicConnect.routeName,
+        arguments: academicConnectScreenNavigationArguments,
       ),
     );
   }

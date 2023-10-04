@@ -1,4 +1,5 @@
 
+import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
 import 'package:baroda_chest_group_admin/models/brochure/data_model/brochure_model.dart';
 import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
 import 'package:baroda_chest_group_admin/models/profile/data_model/committee_member_model.dart';
@@ -26,6 +27,14 @@ class AddCourseScreenNavigationArguments extends NavigationArguments {
   int? index;
 
   AddCourseScreenNavigationArguments({this.isEdit = false, this.eventModel, this.index});
+}
+
+class AddAcademicConnectScreenNavigationArguments extends NavigationArguments {
+  AcademicConnectModel? academicConnectModel;
+  bool isEdit = false;
+  int? index;
+
+  AddAcademicConnectScreenNavigationArguments({this.isEdit = false, this.academicConnectModel, this.index});
 }
 class AddCaseOfMonthScreenNavigationArguments extends NavigationArguments {
   CaseOfMonthModel? caseOfMonthModel;

@@ -1,9 +1,11 @@
 
 import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
 import 'package:baroda_chest_group_admin/models/event/data_model/event_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../configs/constants.dart';
 import '../../configs/typedefs.dart';
+import '../../models/common/data_model/notification_model.dart';
 import '../../models/course/data_model/course_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
@@ -120,8 +122,7 @@ class CaseOfMonthController {
       await caseOfMonthRepository.addCaseOfMonthRepo(caseOfMonth);
       if (isAdInProvider) {
         caseOfMonthProvider.addCaseOfMonthModelInCourseList(caseOfMonth);
-      } else {
-        String title = "Case of month updated";
+        String title = "Case of month added";
         String description = "'${caseOfMonth.caseName}' Case of month has been added";
         String image = caseOfMonth.image;
 
@@ -129,17 +130,25 @@ class CaseOfMonthController {
           title: title,
           description: description,
           image: image,
-          topic: caseOfMonth.id,
+          topic: NotificationTopicType.admin,
           data: <String, dynamic>{
             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
             'id': '1',
             'objectid': caseOfMonth.id,
             'title': title,
             'description': description,
-            'type': NotificationTypes.editCourse,
+            'type': NotificationTypes.caseOfMonth,
             'imageurl': image,
           },
         );
+        NotificationModel notificationModel = NotificationModel(
+          createdTime: Timestamp.now(),
+          title: caseOfMonth.caseName,
+          id: MyUtils.getNewId(),
+          description: caseOfMonth.description,
+          notificationType: NotificationTypes.caseOfMonth,
+        );
+        NotificationController().addNotificationToFirebase(notificationModel);
       }
     } catch (e, s) {
       MyPrint.printOnConsole('Error in Add Course to Firebase in Course Controller $e');

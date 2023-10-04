@@ -10,12 +10,14 @@ class CaseOfMonthModel {
   String image = "";
   Timestamp? createdTime;
   Timestamp? updatedTime;
+  Timestamp? caseOfMonthDate;
 
   CaseOfMonthModel({
     this.id = "",
     this.caseName = "",
     this.description = "",
     this.downloadUrl = "",
+    this.caseOfMonthDate,
     this.image = "",
     this.createdTime,
     this.updatedTime,
@@ -37,6 +39,7 @@ class CaseOfMonthModel {
     description = ParsingHelper.parseStringMethod(map['description']);
     createdTime = ParsingHelper.parseTimestampMethod(map['createdTime']);
     updatedTime = ParsingHelper.parseTimestampMethod(map['updatedTime']);
+    caseOfMonthDate = ParsingHelper.parseTimestampMethod(map['caseOfMonthDate']);
   }
 
   Map<String, dynamic> toMap({bool toJson = false}) {
@@ -46,6 +49,7 @@ class CaseOfMonthModel {
       "image": image,
       "downloadUrl": downloadUrl,
       "description": description,
+      "caseOfMonthDate": caseOfMonthDate,
       "createdTime": createdTime,
       "updatedTime": updatedTime,
     };

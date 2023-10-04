@@ -1,18 +1,21 @@
-import 'package:baroda_chest_group_admin/configs/constants.dart';
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_controller.dart';
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_controller.dart';
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_provider.dart';
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_provider.dart';
+import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
+import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
+import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
+import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
 import 'package:baroda_chest_group_admin/utils/date_presentation.dart';
 import 'package:baroda_chest_group_admin/utils/parsing_helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments.dart';
 import 'package:baroda_chest_group_admin/models/course/data_model/chapter_model.dart';
-import 'package:baroda_chest_group_admin/models/course/data_model/course_model.dart';
 import 'package:baroda_chest_group_admin/utils/extensions.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
 import 'package:baroda_chest_group_admin/utils/my_utils.dart';
-import 'package:baroda_chest_group_admin/views/common/components/common_text.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -32,24 +35,24 @@ import '../../common/components/get_title.dart';
 import '../../common/components/header_widget.dart';
 import '../../common/components/modal_progress_hud.dart';
 
-class AddCourse extends StatefulWidget {
-  static const String routeName = "/AddCourse";
-  final AddCourseScreenNavigationArguments arguments;
+class AddAcademicConnect extends StatefulWidget {
+  static const String routeName = "/AddAcademicConnect";
+  final AddAcademicConnectScreenNavigationArguments arguments;
 
-  const AddCourse({Key? key, required this.arguments}) : super(key: key);
+  const AddAcademicConnect({Key? key, required this.arguments}) : super(key: key);
 
   @override
-  State<AddCourse> createState() => _AddCourseState();
+  State<AddAcademicConnect> createState() => _AddAcademicConnectState();
 }
 
-class _AddCourseState extends State<AddCourse> with MySafeState {
+class _AddAcademicConnectState extends State<AddAcademicConnect> with MySafeState {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   bool isCourseEnabled = true;
 
   late Future<void> futureGetData;
-  late EventProvider eventProvider;
-  late EventController eventController;
+  late AcademicConnectProvider academicConnectProvider;
+  late AcademicConnectController academicConnectController;
   DateTime? eventStartDate, eventEndDate;
 
   TextEditingController eventNameController = TextEditingController();
@@ -58,7 +61,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
   TextEditingController startDateTimeController = TextEditingController();
   TextEditingController endDateTimeController = TextEditingController();
   TextEditingController totalSeatController = TextEditingController();
-  TextEditingController youtubeUrlController = TextEditingController();
+  TextEditingController downloadUrlController = TextEditingController();
 
   String? thumbnailImageUrl;
   Uint8List? thumbnailImage;
@@ -68,11 +71,11 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
 
   List<ChapterModel> chapters = [];
 
-  EventModel? pageCourseModel;
+  AcademicConnectModel? pageCourseModel;
 
   Future<void> getData() async {
-    if (widget.arguments.eventModel != null) {
-      pageCourseModel = widget.arguments.eventModel;
+    if (widget.arguments.academicConnectModel != null) {
+      pageCourseModel = widget.arguments.academicConnectModel;
     }
 
     if (pageCourseModel != null) {
@@ -80,11 +83,11 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       eventDescriptionController.text = pageCourseModel!.description;
       thumbnailImageUrl = pageCourseModel!.imageUrl;
       eventStartDate = pageCourseModel!.eventStartDate!.toDate();
-      selectedEventType = pageCourseModel!.eventType;
       eventEndDate = pageCourseModel!.eventEndDate!.toDate();
       addressController.text = pageCourseModel!.address;
-      youtubeUrlController.text = pageCourseModel!.youtubeUrl;
       totalSeatController.text = pageCourseModel!.totalSeats.toString();
+      eventEndDate = pageCourseModel!.eventEndDate!.toDate();
+      downloadUrlController.text = pageCourseModel!.downloadUrl;
       startDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(pageCourseModel!.eventStartDate!);
       endDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(pageCourseModel!.eventEndDate!);
     }
@@ -133,7 +136,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       //   ],
       // );
       // if (croppedFile != null) {
-      thumbnailImage = await pickedFile.readAsBytes();
+        thumbnailImage = await pickedFile.readAsBytes();
       // }
       thumbnailImageName = pickedFile.name;
 
@@ -174,35 +177,33 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       return;
     }
 
-    EventModel eventModel = EventModel(
+    AcademicConnectModel eventModel = AcademicConnectModel(
       id: courseId.trim(),
       eventStartDate: Timestamp.fromDate(eventStartDate!),
       eventEndDate: Timestamp.fromDate(eventEndDate!),
       title: eventNameController.text.trim(),
       description: eventDescriptionController.text.trim(),
       address: addressController.text.trim(),
-      eventType: selectedEventType,
-      youtubeUrl: youtubeUrlController.text.trim(),
+      downloadUrl: downloadUrlController.text.trim(),
       totalSeats: ParsingHelper.parseIntMethod(totalSeatController.text.trim()),
       imageUrl: thumbnailImageUrl!.trim(),
       createdTime: pageCourseModel?.createdTime ?? Timestamp.now(),
       updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
 
-    await eventController.addEventToFirebase(
-      eventModel: eventModel,
+    await academicConnectController. addAcademicConnectToFirebase(
+      academicConnectModel: eventModel,
       isAdInProvider: pageCourseModel == null,
     );
     MyPrint.printOnConsole('Added Course Model is ${eventModel.toMap()}');
 
     if (pageCourseModel != null) {
-      EventModel model = pageCourseModel!;
+      AcademicConnectModel model = pageCourseModel!;
       model.title = eventModel.title;
       model.description = eventModel.description;
       model.imageUrl = eventModel.imageUrl;
       model.totalSeats = eventModel.totalSeats;
       model.address = eventModel.address;
-      model.eventType = eventModel.eventType;
       model.createdTime = eventModel.createdTime;
       model.updatedTime = eventModel.updatedTime;
       model.eventStartDate = eventModel.eventStartDate;
@@ -212,8 +213,8 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
     setState(() {
       isLoading = false;
     });
-    if (context.mounted && context.checkMounted()) {
-      MyToast.showSuccess(context: context, msg: pageCourseModel == null ? 'Event Added Successfully' : 'Event Edited Successfully');
+    if(context.mounted && context.checkMounted()){
+      MyToast.showSuccess(context: context, msg: pageCourseModel == null ? 'Academic Connect Added Successfully' : 'Academic Connect Edited Successfully');
     }
   }
 
@@ -250,7 +251,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2001),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2025).add(Duration(days: 365)),
     );
     if (context.mounted && context.checkMounted()) {
@@ -260,7 +261,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
 
       if (pickedDate != null && endTime != null) {
         eventEndDate = pickedDate.copyWith(hour: endTime.hour, minute: endTime.minute, second: 0, microsecond: 0, millisecond: 0);
-        if (eventEndDate != null) {
+        if(eventEndDate != null) {
           endDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(
             Timestamp.fromDate(eventEndDate!),
           );
@@ -273,8 +274,8 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
   @override
   void initState() {
     super.initState();
-    eventProvider = Provider.of<EventProvider>(context, listen: false);
-    eventController = EventController(eventProvider: eventProvider);
+    academicConnectProvider = Provider.of<AcademicConnectProvider>(context, listen: false);
+    academicConnectController = AcademicConnectController(academicConnectProvider: academicConnectProvider);
     futureGetData = getData();
   }
 
@@ -297,25 +298,23 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
                 key: _formKey,
                 child: Column(
                   children: [
-                    HeaderWidget(title: pageCourseModel == null ? "Add Event" : "Edit Event", isBackArrow: true),
+                    HeaderWidget(title: pageCourseModel == null ? "Add Academic Connect" : "Edit Academic Connect", isBackArrow: true),
                     const SizedBox(height: 20),
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            getChapterName(),
+                            getAcademicConnectTitle(),
                             const SizedBox(height: 20),
                             getDescriptionTextField(),
                             const SizedBox(height: 20),
                             getAddressTextField(),
                             const SizedBox(height: 30),
-                            getTotalSeatTextField(),
-                            const SizedBox(height: 30),
-                            getEventTypeSelection(),
-                            const SizedBox(height: 30),
                             getDownloadUrlTextField(),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 30),
+                            // getTotalSeatTextField(),
+                            // const SizedBox(height: 20),
                             Row(
                               children: [
                                 Expanded(child: getStartDateTextField()),
@@ -343,54 +342,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
     );
   }
 
-  String selectedEventType = EventTypes.typeSocial;
-
-  Widget getEventTypeSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GetTitle(title: "Select Event Type"),
-        Row(
-          children: [
-            SizedBox(width: 20,),
-
-            Row(
-              children: [
-                Radio(
-                  activeColor: AppColor.bgSideMenu,
-                  value: EventTypes.typeSocial,
-                  groupValue: selectedEventType,
-                  onChanged: (String? val) {
-                    selectedEventType = val ?? "";
-                    mySetState();
-                  },
-                ),
-                CommonText(text: EventTypes.typeSocial,fontSize: 17,)
-              ],
-            ),
-            SizedBox(width: 20,),
-            Row(
-              children: [
-                Radio(
-                  activeColor: AppColor.bgSideMenu,
-
-                  value: EventTypes.typeAcademic,
-                  groupValue: selectedEventType,
-                  onChanged: (String? val) {
-                    selectedEventType = val ?? "";
-                    mySetState();
-                  },
-                ),
-                CommonText(text: EventTypes.typeAcademic,fontSize: 17)
-              ],
-            )
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget getChapterName() {
+  Widget getAcademicConnectTitle() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -399,13 +351,13 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GetTitle(title: "Enter Event Title*"),
+              GetTitle(title: "Enter Academic Connect Title*"),
               CommonTextFormField(
                 controller: eventNameController,
-                hintText: "Enter Event Name",
+                hintText: "Enter Academic Connect Name",
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "  Please enter Event Name";
+                    return "  Please enter Academic Connect Name";
                   }
                   return null;
                 },
@@ -422,10 +374,10 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Enter description of event"),
+        GetTitle(title: "Enter description of academic connect"),
         CommonTextFormField(
           controller: eventDescriptionController,
-          hintText: "Enter description of event",
+          hintText: "Enter description of academic connect",
           minLines: 3,
           maxLines: 10,
           validator: (value) {
@@ -510,7 +462,6 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       ],
     );
   }
-
   Widget getDownloadUrlTextField() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -520,16 +471,16 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GetTitle(title: "Youtube URL"),
+              GetTitle(title: "Download URL"),
               CommonTextFormField(
-                controller: youtubeUrlController,
-                hintText: "Enter Youtube URL",
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return "  Please enter download URL";
-                //   }
-                //   return null;
-                // },
+                controller: downloadUrlController,
+                hintText: "Enter Download URL",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "  Please enter download URL";
+                  }
+                  return null;
+                },
               ),
             ],
           ),
@@ -561,6 +512,8 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
             ],
           ),
         ),
+        const SizedBox(width: 20),
+        Expanded(child: Container()),
       ],
     );
   }
@@ -570,7 +523,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Choose Event Thumbnail Image*"),
+        GetTitle(title: "Choose Academic Connect Thumbnail Image*"),
         thumbnailImage == null && thumbnailImageUrl == null && (thumbnailImageUrl?.isEmpty ?? true)
             ? InkWell(
                 onTap: () async {
@@ -604,7 +557,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this Event?",
+                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this academic connect?",
                 leftText: "No",
                 rightText: "Yes",
                 rightOnTap: () {
@@ -624,7 +577,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
           Navigator.pop(context);
         }
       },
-      text: pageCourseModel == null ? '+   Add Event' : '+   Edit Event',
+      text: pageCourseModel == null ? '+   Add Academic Connect' : '+   Edit Academic Connect',
       fontSize: 17,
     );
   }

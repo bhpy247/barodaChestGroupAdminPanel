@@ -28,6 +28,7 @@ class CommonText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if(text.isEmpty) return SizedBox();
     return Text(
       text,
       textAlign: textAlign,

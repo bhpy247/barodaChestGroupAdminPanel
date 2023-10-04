@@ -1,3 +1,4 @@
+import 'package:baroda_chest_group_admin/views/academic_connect/screens/academic_connect_list_screen.dart';
 import 'package:baroda_chest_group_admin/views/banner/screen/banner_list_screen.dart';
 import 'package:baroda_chest_group_admin/views/brochure/screens/brochure_list.dart';
 import 'package:baroda_chest_group_admin/views/caseofmonth/screens/case_of_month_list.dart';
@@ -108,7 +109,8 @@ class _HomePageState extends State<HomePage> {
               tabNumber = 6;
             });
           },
-        ),DrawerListTile(
+        ),
+        DrawerListTile(
           title: "Contact Us",
           icon: MdiIcons.contacts,
           press: () {
@@ -116,12 +118,21 @@ class _HomePageState extends State<HomePage> {
               tabNumber = 7;
             });
           },
-        ),DrawerListTile(
+        ),
+        DrawerListTile(
           title: "Banners",
           icon: MdiIcons.imageAlbum,
           press: () {
             setState(() {
               tabNumber = 8;
+            });
+          },
+        ), DrawerListTile(
+          title: "Academic Connect",
+          icon: MdiIcons.imageAlbum,
+          press: () {
+            setState(() {
+              tabNumber = 9;
             });
           },
         ),
@@ -198,8 +209,9 @@ class _HomePageState extends State<HomePage> {
                           tabNumber = 6;
                         });
                       },
-                    ),DrawerListTile(
-                      title: "Contact Us",
+                    ),
+                    DrawerListTile(
+                      title: "FeedBack",
                       icon: MdiIcons.contacts,
                       press: () {
                         setState(() {
@@ -212,19 +224,28 @@ class _HomePageState extends State<HomePage> {
                       icon: Icons.library_books_outlined,
                       press: () {
                         setState(() {
-                          tabNumber=8;
+                          tabNumber = 8;
                         });
                       },
                     ),
-                    /*DrawerListTile(
-                      title: "System",
+                    DrawerListTile(
+                      title: "Academic Connect",
                       icon: Icons.library_books_outlined,
                       press: () {
                         setState(() {
-                          tabNumber=5;
+                          tabNumber = 9;
                         });
                       },
-                    ),*/
+                    ),
+                    DrawerListTile(
+                      title: "Users",
+                      icon: Icons.library_books_outlined,
+                      press: () {
+                        setState(() {
+                          tabNumber=10;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -281,9 +302,19 @@ class _HomePageState extends State<HomePage> {
       case 7:
         {
           return const ContactUsScreenNavigator();
-        } case 8:
+        }
+      case 8:
         {
           return const BannerScreen();
+        }
+
+        case 9:
+        {
+          return const AcademicConnectNavigator();
+        }
+        case 10:
+        {
+          return const UserScreenNavigator();
         }
 
       // case 4:{

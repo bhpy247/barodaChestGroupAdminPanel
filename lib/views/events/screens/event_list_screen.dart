@@ -3,6 +3,7 @@ import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments
 import 'package:baroda_chest_group_admin/models/course/data_model/course_model.dart';
 import 'package:baroda_chest_group_admin/models/event/data_model/event_model.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -60,6 +61,69 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
       isFromCache: isFromCache,
       isNotify: isNotify,
     );
+  }
+
+  void showSimpleSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text(
+          message,
+          style: themeData.textTheme.titleSmall?.merge(TextStyle(color: themeData.colorScheme.onPrimary)),
+        ),
+        backgroundColor: themeData.colorScheme.primary,
+      ),
+    );
+  }
+
+  Future<void> deleteEvent(EventModel eventModel) async {
+    if (eventModel.id.isEmpty) {
+      return;
+    }
+
+    dynamic value = await showDialog(
+      context: context,
+      builder: (context) {
+        return CommonPopup(
+          text: "Are you sure want to delete this Event?",
+          leftText: "Cancel",
+          rightText: "Delete",
+          rightOnTap: () {
+            Navigator.pop(context, true);
+          },
+          rightBackgroundColor: Colors.red,
+        );
+      },
+    );
+
+    if (value != true) {
+      return;
+    }
+
+    isLoading = true;
+    mySetState();
+
+    bool isDeleted = await FirebaseNodes.eventsDocumentReference(courseId: eventModel.id).delete().then((value) {
+      return true;
+    }).catchError((e, s) {
+      MyPrint.printOnConsole("Error in Deleting Event:$e");
+      MyPrint.printOnConsole(s);
+
+      return false;
+    });
+
+    isLoading = false;
+    if (isDeleted) {
+      eventProvider.allEvent.getList().remove(eventModel);
+    }
+
+    mySetState();
+
+    if (isDeleted) {
+      showSimpleSnackbar("Deleted");
+    } else {
+      showSimpleSnackbar("Error in Deleting Event");
+    }
   }
 
   @override
@@ -124,12 +188,12 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
   }
 
   Widget getCourseList({required BuildContext topContext}) {
-    return Consumer(builder: (BuildContext context, EventProvider courseProvider, Widget? child) {
-      if (courseProvider.isCoursesFirstTimeLoading.get()) {
+    return Consumer(builder: (BuildContext context, EventProvider eventProvider, Widget? child) {
+      if (eventProvider.isCoursesFirstTimeLoading.get()) {
         return const Center(child: CommonProgressIndicator());
       }
 
-      if (!courseProvider.isCoursesLoading.get() && courseProvider.allCoursesLength == 0) {
+      if (!eventProvider.isCoursesLoading.get() && eventProvider.allCoursesLength == 0) {
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return RefreshIndicator(
@@ -145,7 +209,7 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
                 children: [
                   SizedBox(height: constraints.maxHeight / 2.05),
                   const Center(
-                    child: Text("No Courses"),
+                    child: Text("No Events"),
                   ),
                 ],
               ),
@@ -154,7 +218,7 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
         );
       }
 
-      List<EventModel> events = courseProvider.allEvent.getList(isNewInstance: false);
+      List<EventModel> events = eventProvider.allEvent.getList(isNewInstance: false);
 
       double? cacheExtent = scrollController.hasClients ? scrollController.position.maxScrollExtent : null;
       // MyPrint.printOnConsole("cacheExtent:$cacheExtent");
@@ -174,7 +238,7 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
           itemCount: events.length + 1,
           itemBuilder: (BuildContext context, int index) {
             if ((index == 0 && events.isEmpty) || (index == events.length)) {
-              if (courseProvider.isCoursesLoading.get()) {
+              if (eventProvider.isCoursesLoading.get()) {
                 // if(true) {
                 return const CommonProgressIndicator();
               } else {
@@ -182,7 +246,7 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
               }
             }
 
-            if (courseProvider.hasMoreCourses.get() && index > (events.length - AppConstants.coursesRefreshLimitForPagination)) {
+            if (eventProvider.hasMoreCourses.get() && index > (events.length - AppConstants.coursesRefreshLimitForPagination)) {
               WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                 eventController.getCoursesPaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
               });
@@ -206,7 +270,7 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Want to Edit course?",
+                text: "Want to Edit Event?",
                 rightText: "Yes",
                 rightOnTap: () async {
                   Navigator.pop(context);
@@ -276,6 +340,21 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
                   ],
                 ),
               ),
+              SizedBox(width: 15,),
+              InkWell(
+                child: const Icon(Icons.edit),
+              ),
+              SizedBox(width: 15,),
+              InkWell(
+                  onTap: () async {
+                    await deleteEvent(eventModel);
+                    getData(
+                      isRefresh: true,
+                      isFromCache: false,
+                      isNotify: false,
+                    );
+                  },
+                  child: const Icon(Icons.delete))
             ],
           ),
         ),

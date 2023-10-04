@@ -1,3 +1,4 @@
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_provider.dart';
 import 'package:baroda_chest_group_admin/backend/brochure/brochure_provider.dart';
 import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_provider.dart';
 import 'package:baroda_chest_group_admin/backend/contact_us/contact_us_provider.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<CommitteeMemberProvider>(create: (_) => CommitteeMemberProvider(), lazy: false),
         ChangeNotifierProvider<GuidelineProvider>(create: (_) => GuidelineProvider(), lazy: false),
         ChangeNotifierProvider<ContactUsProvider>(create: (_) => ContactUsProvider(), lazy: false),
+        ChangeNotifierProvider<AcademicConnectProvider>(create: (_) => AcademicConnectProvider(), lazy: false),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -1,21 +1,18 @@
-import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_controller.dart';
-import 'package:baroda_chest_group_admin/backend/member/member_controller.dart';
-import 'package:baroda_chest_group_admin/backend/member/member_provider.dart';
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_controller.dart';
+import 'package:baroda_chest_group_admin/backend/academic_connect/academic_connect_provider.dart';
 import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments.dart';
+import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../../backend/committee_member/committee_member_provider.dart';
 import '../../../backend/navigation/navigation_controller.dart';
 import '../../../backend/navigation/navigation_operation_parameters.dart';
 import '../../../backend/navigation/navigation_type.dart';
 import '../../../configs/constants.dart';
-import '../../../models/profile/data_model/committee_member_model.dart';
-import '../../../models/profile/data_model/member_model.dart';
 import '../../../utils/app_colors.dart';
-import '../../../utils/my_print.dart';
 import '../../common/components/common_button.dart';
 import '../../common/components/common_cachednetwork_image.dart';
 import '../../common/components/common_popup.dart';
@@ -24,122 +21,57 @@ import '../../common/components/common_text.dart';
 import '../../common/components/header_widget.dart';
 import '../../common/components/modal_progress_hud.dart';
 
-class CommitteeMemberScreenNavigator extends StatefulWidget {
-  const CommitteeMemberScreenNavigator({Key? key}) : super(key: key);
+class AcademicConnectNavigator extends StatefulWidget {
+  const AcademicConnectNavigator({Key? key}) : super(key: key);
 
   @override
-  _CommitteeMemberScreenNavigatorState createState() => _CommitteeMemberScreenNavigatorState();
+  _AcademicConnectNavigatorState createState() => _AcademicConnectNavigatorState();
 }
 
-class _CommitteeMemberScreenNavigatorState extends State<CommitteeMemberScreenNavigator> {
+class _AcademicConnectNavigatorState extends State<AcademicConnectNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: NavigationController.committeeMemberScreenNavigator,
-      onGenerateRoute: NavigationController.onCommitteeMemberGeneratedRoutes,
+      key: NavigationController.academicConnectScreenNavigator,
+      onGenerateRoute: NavigationController.onAcademicConnectGeneratedRoutes,
     );
   }
 }
 
-class CommitteeMemberScreen extends StatefulWidget {
-  const CommitteeMemberScreen({super.key});
+class AcademicConnectListScreen extends StatefulWidget {
+  const AcademicConnectListScreen({Key? key}) : super(key: key);
 
   @override
-  State<CommitteeMemberScreen> createState() => _CommitteeMemberScreenState();
+  State<AcademicConnectListScreen> createState() => _AcademicConnectListScreenState();
 }
 
-class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySafeState {
+class _AcademicConnectListScreenState extends State<AcademicConnectListScreen> with MySafeState {
   ScrollController scrollController = ScrollController();
   bool isLoading = false;
 
-  late CommitteeMemberProvider committeeMemberProvider;
-  late CommitteeMemberController committeeMemberController;
+  late AcademicConnectProvider academicConnectProvider;
+  late AcademicConnectController academicConnectController;
 
   Future<void> getData({bool isRefresh = true, bool isFromCache = false, bool isNotify = true}) async {
-    await committeeMemberController.getCommitteeMemberPaginatedList(
+    await academicConnectController.getAcademicConnectPaginatedList(
       isRefresh: isRefresh,
       isFromCache: isFromCache,
       isNotify: isNotify,
     );
   }
 
-  Future<void> deleteEvent(CommitteeMemberModel committeeMemberModel) async {
-    if (committeeMemberModel.id.isEmpty) {
-      return;
-    }
-
-    dynamic value = await showDialog(
-      context: context,
-      builder: (context) {
-        return CommonPopup(
-          text: "Are you sure want to delete this Event?",
-          leftText: "Cancel",
-          rightText: "Delete",
-          rightOnTap: () {
-            Navigator.pop(context, true);
-          },
-          rightBackgroundColor: Colors.red,
-        );
-      },
-    );
-
-    if (value != true) {
-      return;
-    }
-
-    isLoading = true;
-    mySetState();
-
-    bool isDeleted = await FirebaseNodes.committeeMemberDocumentReference(userId: committeeMemberModel.id).delete().then((value) {
-      return true;
-    }).catchError((e, s) {
-      MyPrint.printOnConsole("Error in Deleting Event:$e");
-      MyPrint.printOnConsole(s);
-
-      return false;
-    });
-
-    isLoading = false;
-    if(isDeleted) {
-      committeeMemberProvider.committeeMemberList.getList().remove(committeeMemberModel);
-    }
-
-    mySetState();
-
-    if(isDeleted) {
-      showSimpleSnackbar("Deleted");
-    }
-    else {
-      showSimpleSnackbar("Error in Deleting Event");
-    }
-  }
-
-  void showSimpleSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1000),
-        content: Text(
-          message,
-          style: themeData.textTheme.titleSmall?.merge(TextStyle(color: themeData.colorScheme.onPrimary)),
-        ),
-        backgroundColor: themeData.colorScheme.primary,
-      ),
-    );
-  }
-
-
   @override
   void initState() {
     super.initState();
-    committeeMemberProvider = Provider.of<CommitteeMemberProvider>(context, listen: false);
-    committeeMemberController = CommitteeMemberController(committeeMemberProvider: committeeMemberProvider);
+    academicConnectProvider = Provider.of<AcademicConnectProvider>(context, listen: false);
+    academicConnectController = AcademicConnectController(academicConnectProvider: academicConnectProvider);
 
     getData(
       isRefresh: true,
       isFromCache: false,
       isNotify: false,
     );
-    /*if (courseProvider.allCoursesLength == 0 && courseProvider.hasMoreCourses.get()) {
+    /*if (courseProvider.allAcademicConnectLength == 0 && courseProvider.hasMoreAcademicConnect.get()) {
       getData(
         isRefresh: true,
         isFromCache: false,
@@ -151,6 +83,7 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
   @override
   Widget build(BuildContext context) {
     super.pageBuild();
+
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       body: ModalProgressHUD(
@@ -158,43 +91,43 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
         child: Column(
           children: [
             HeaderWidget(
-              title: "Committee Member",
+              title: "Academic Connect",
               suffixWidget: CommonButton(
-                text: "Add Committee Member",
+                text: "Add Academic Connect",
                 icon: Icon(
                   Icons.add,
                   color: AppColor.white,
                 ),
                 onTap: () async {
-                  await NavigationController.navigateToAddCommitteeMemberScreen(
+                  await NavigationController.navigateToAddAcademicConnectScreen(
                       navigationOperationParameters: NavigationOperationParameters(
                         navigationType: NavigationType.pushNamed,
                         context: context,
                       ),
-                      addMemberScreenNavigationArguments: AddCommitteeMemberScreenNavigationArguments());
-                  // getData(
-                  //   isRefresh: true,
-                  //   isFromCache: false,
-                  //   isNotify: true,
-                  // );
+                      academicConnectScreenNavigationArguments: AddAcademicConnectScreenNavigationArguments());
+                  getData(
+                    isRefresh: true,
+                    isFromCache: false,
+                    isNotify: true,
+                  );
                 },
               ),
             ),
             const SizedBox(height: 20),
-            Expanded(child: getMemberList(topContext: context)),
+            Expanded(child: getCourseList(topContext: context)),
           ],
         ),
       ),
     );
   }
 
-  Widget getMemberList({required BuildContext topContext}) {
-    return Consumer(builder: (BuildContext context, CommitteeMemberProvider memberProvider, Widget? child) {
-      if (memberProvider.isCommitteeMemberFirstTimeLoading.get()) {
+  Widget getCourseList({required BuildContext topContext}) {
+    return Consumer(builder: (BuildContext context, AcademicConnectProvider courseProvider, Widget? child) {
+      if (courseProvider.isAcademicConnectFirstTimeLoading.get()) {
         return const Center(child: CommonProgressIndicator());
       }
 
-      if (!memberProvider.isCommitteeMemberLoading.get() && memberProvider.allCommitteeMemberLength == 0) {
+      if (!courseProvider.isAcademicConnectLoading.get() && courseProvider.allAcademicConnectLength == 0) {
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return RefreshIndicator(
@@ -210,7 +143,7 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
                 children: [
                   SizedBox(height: constraints.maxHeight / 2.05),
                   const Center(
-                    child: Text("No CommitteeMember"),
+                    child: Text("No AcademicConnect"),
                   ),
                 ],
               ),
@@ -219,7 +152,7 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
         );
       }
 
-      List<CommitteeMemberModel> member = memberProvider.committeeMemberList.getList(isNewInstance: false);
+      List<AcademicConnectModel> academicConnect = courseProvider.allEvent.getList(isNewInstance: false);
 
       double? cacheExtent = scrollController.hasClients ? scrollController.position.maxScrollExtent : null;
       // MyPrint.printOnConsole("cacheExtent:$cacheExtent");
@@ -236,10 +169,10 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
           controller: scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           cacheExtent: cacheExtent,
-          itemCount: member.length + 1,
+          itemCount: academicConnect.length + 1,
           itemBuilder: (BuildContext context, int index) {
-            if ((index == 0 && member.isEmpty) || (index == member.length)) {
-              if (memberProvider.isCommitteeMemberLoading.get()) {
+            if ((index == 0 && academicConnect.isEmpty) || (index == academicConnect.length)) {
+              if (courseProvider.isAcademicConnectLoading.get()) {
                 // if(true) {
                 return const CommonProgressIndicator();
               } else {
@@ -247,15 +180,13 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
               }
             }
 
-            if (memberProvider.hasMoreCommitteeMember.get() && index > (member.length - AppConstants.coursesRefreshLimitForPagination)) {
+            if (courseProvider.hasMoreAcademicConnect.get() && index > (academicConnect.length - AppConstants.coursesRefreshLimitForPagination)) {
               WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                committeeMemberController.getCommitteeMemberPaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
+                academicConnectController.getAcademicConnectPaginatedList(isRefresh: false, isFromCache: false, isNotify: false);
               });
             }
 
-            CommitteeMemberModel model = member[index];
-
-            // MyPrint.printOnConsole("Member Model: ${model.toMap()}");
+            AcademicConnectModel model = academicConnect[index];
 
             return singleCourse(model, index, topContext);
           },
@@ -264,7 +195,7 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
     });
   }
 
-  Widget singleCourse(CommitteeMemberModel memberModel, int index, BuildContext topContext) {
+  Widget singleCourse(AcademicConnectModel eventModel, int index, BuildContext topContext) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: InkWell(
@@ -273,17 +204,17 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Want to Edit member?",
+                text: "Want to Edit course?",
                 rightText: "Yes",
                 rightOnTap: () async {
                   Navigator.pop(context);
-                  await NavigationController.navigateToAddCommitteeMemberScreen(
+                  await NavigationController.navigateToAddAcademicConnectScreen(
                     navigationOperationParameters: NavigationOperationParameters(
                       navigationType: NavigationType.pushNamed,
                       context: topContext,
                     ),
-                    addMemberScreenNavigationArguments: AddCommitteeMemberScreenNavigationArguments(
-                      committeeMemberModel: memberModel,
+                    academicConnectScreenNavigationArguments: AddAcademicConnectScreenNavigationArguments(
+                      academicConnectModel: eventModel,
                       index: index,
                       isEdit: true,
                     ),
@@ -303,7 +234,6 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 decoration: BoxDecoration(
@@ -316,7 +246,7 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
                 //   width: 80,
                 // ),
                 child: CommonCachedNetworkImage(
-                  imageUrl: memberModel.profileUrl,
+                  imageUrl: eventModel.imageUrl,
                   height: 80,
                   width: 80,
                   borderRadius: 4,
@@ -328,35 +258,36 @@ class _CommitteeMemberScreenState extends State<CommitteeMemberScreen> with MySa
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CommonText(
-                      text: memberModel.name,
+                      text: eventModel.title,
                       fontSize: 20,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
                       fontWeight: FontWeight.bold,
                     ),
                     const SizedBox(height: 10),
                     CommonText(
-                      text: memberModel.type,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    const SizedBox(
-                      height: 10,
+                      text: eventModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(eventModel.createdTime!.toDate())}',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              InkWell(
-                  onTap: () async {
-                    await deleteEvent(memberModel);
-                    getData(
-                      isRefresh: true,
-                      isFromCache: false,
-                      isNotify: false,
-                    );
-                  },
-                  child: const Icon(Icons.delete))
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget getTestEnableSwitch({required bool value, void Function(bool?)? onChanged}) {
+    return Tooltip(
+      message: value ? 'Enabled' : 'Disabled',
+      child: CupertinoSwitch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: AppColor.bgSideMenu,
       ),
     );
   }

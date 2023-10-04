@@ -8,6 +8,7 @@ class MemberModel {
   String designation = "";
   String email = "";
   String address = "";
+  int mobile = 0;
   Timestamp? createdTime;
 
 
@@ -17,6 +18,7 @@ class MemberModel {
     this.designation = "",
     this.email = "",
     this.address = "",
+    this.mobile = 0,
     this.createdTime,
 
   });
@@ -32,6 +34,7 @@ class MemberModel {
     id = ParsingHelper.parseStringMethod(map['id']);
     name = ParsingHelper.parseStringMethod(map['name']);
     email = ParsingHelper.parseStringMethod(map['email']);
+    mobile = ParsingHelper.parseIntMethod(map['mobile']);
     designation = ParsingHelper.parseStringMethod(map['designation']);
     address = ParsingHelper.parseStringMethod(map['address']);
     createdTime = ParsingHelper.parseTimestampMethod(map['createdTime']);
@@ -42,6 +45,7 @@ class MemberModel {
       "id": id,
       "name": name,
       "email": email,
+      "mobile": mobile,
       "address": address,
       "designation": designation,
       "createdTime": createdTime,

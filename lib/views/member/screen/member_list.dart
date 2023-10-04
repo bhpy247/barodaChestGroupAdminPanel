@@ -28,7 +28,7 @@ class MemberScreenNavigator extends StatefulWidget {
   _MemberScreenNavigatorState createState() => _MemberScreenNavigatorState();
 }
 
-class _MemberScreenNavigatorState extends State<MemberScreenNavigator>  {
+class _MemberScreenNavigatorState extends State<MemberScreenNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -60,6 +60,69 @@ class _MemberScreenState extends State<MemberScreen> with MySafeState {
     );
   }
 
+  void showSimpleSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text(
+          message,
+          style: themeData.textTheme.titleSmall?.merge(TextStyle(color: themeData.colorScheme.onPrimary)),
+        ),
+        backgroundColor: themeData.colorScheme.primary,
+      ),
+    );
+  }
+
+  Future<void> deleteEvent(MemberModel memberModel) async {
+    if (memberModel.id.isEmpty) {
+      return;
+    }
+
+    dynamic value = await showDialog(
+      context: context,
+      builder: (context) {
+        return CommonPopup(
+          text: "Are you sure want to delete this Event?",
+          leftText: "Cancel",
+          rightText: "Delete",
+          rightOnTap: () {
+            Navigator.pop(context, true);
+          },
+          rightBackgroundColor: Colors.red,
+        );
+      },
+    );
+
+    if (value != true) {
+      return;
+    }
+
+    isLoading = true;
+    mySetState();
+
+    bool isDeleted = await FirebaseNodes.memberDocumentReference(docId: memberModel.id).delete().then((value) {
+      return true;
+    }).catchError((e, s) {
+      MyPrint.printOnConsole("Error in Deleting Member:$e");
+      MyPrint.printOnConsole(s);
+
+      return false;
+    });
+
+    isLoading = false;
+    if (isDeleted) {
+      memberProvider.memberList.getList().remove(memberModel);
+    }
+
+    mySetState();
+
+    if (isDeleted) {
+      showSimpleSnackbar("Deleted");
+    } else {
+      showSimpleSnackbar("Error in Deleting Member");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +142,7 @@ class _MemberScreenState extends State<MemberScreen> with MySafeState {
       );
     }*/
   }
+
   @override
   Widget build(BuildContext context) {
     super.pageBuild();
@@ -103,11 +167,11 @@ class _MemberScreenState extends State<MemberScreen> with MySafeState {
                         context: context,
                       ),
                       addMemberScreenNavigationArguments: AddMemberScreenNavigationArguments());
-                  // getData(
-                  //   isRefresh: true,
-                  //   isFromCache: false,
-                  //   isNotify: true,
-                  // );
+                  getData(
+                    isRefresh: true,
+                    isFromCache: false,
+                    isNotify: true,
+                  );
                 },
               ),
             ),
@@ -233,40 +297,60 @@ class _MemberScreenState extends State<MemberScreen> with MySafeState {
             border: Border.all(color: AppColor.yellow, width: 1),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              CommonText(
-                text: memberModel.name,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      text: memberModel.name,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: memberModel.email,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: memberModel.designation,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: memberModel.address,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    if(memberModel.address.isNotEmpty)
+                    const SizedBox(height: 10),
+                    CommonText(
+                      text: memberModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(memberModel.createdTime!.toDate())}',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      textOverFlow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              CommonText(
-                text: memberModel.email,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              const SizedBox(height: 10),
-              CommonText(
-                text: memberModel.designation,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              const SizedBox(height: 10),
-              CommonText(
-                text: memberModel.address,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              const SizedBox(height: 10),
-              CommonText(
-                text: memberModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(memberModel.createdTime!.toDate())}',
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                textOverFlow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 10,),
+              InkWell(
+                onTap: () async {
+                  await deleteEvent(memberModel);
+                  getData(
+                    isRefresh: true,
+                    isFromCache: false,
+                    isNotify: false,
+                  );
+                },
+                child: const Icon(Icons.delete),
+              )
             ],
           ),
         ),

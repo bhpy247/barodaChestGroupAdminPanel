@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_controller.dart';
@@ -57,7 +56,6 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
   String? thumbnailImageUrl;
   Uint8List? thumbnailImage;
   String? thumbnailImageName;
-
 
   CommitteeMemberModel? pageCommitteeMemberModel;
 
@@ -150,17 +148,17 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
       thumbnailImageUrl = await uploadFileToFirebaseStorage(courseId: courseId, imageName: thumbnailImageName!);
     }
 
-    if (thumbnailImageUrl == null) {
-      // ignore: use_build_context_synchronously
-      MyToast.showError(context: context, msg: 'There is some issue in uploading course image. Kindly try again!');
-      return;
-    }
+    // if (thumbnailImageUrl == null) {
+    //   // ignore: use_build_context_synchronously
+    //   MyToast.showError(context: context, msg: 'There is some issue in uploading course image. Kindly try again!');
+    //   return;
+    // }
 
     CommitteeMemberModel memberModel = CommitteeMemberModel(
       id: courseId.trim(),
       name: nameController.text.trim(),
       type: selectedType ?? "",
-      profileUrl: thumbnailImageUrl!.trim(),
+      profileUrl: thumbnailImageUrl?.trim() ?? "",
       createdTime: pageCommitteeMemberModel?.createdTime ?? Timestamp.now(),
       // updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
@@ -370,13 +368,12 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
     );
   }
 
-  Widget getDropDownForType(){
+  Widget getDropDownForType() {
     return Card(
       color: Colors.grey[50],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       elevation: 2,
       child: DropdownButtonFormField<String>(
-
         decoration: InputDecoration(
           filled: true,
           hintText: 'Select type',
@@ -405,7 +402,18 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
             borderRadius: BorderRadius.circular(4),
           ),
         ),
-        items: <String>['Patron', 'President', 'Vice President', 'Secretary', 'Treasurer', 'Member Radiology', 'Social Media'].map((String value) {
+        items: <String>[
+          'Patron',
+          'President',
+          'Vice President',
+          'Secretary',
+          'Treasurer',
+          'Member Radiology',
+          'Social Media & Website',
+          "Charitable Activity",
+          "Academics",
+          "Member",
+        ].map((String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(value),
@@ -413,7 +421,7 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
         }).toList(),
         value: selectedType,
         onChanged: (String? value) {
-          if(value != null){
+          if (value != null) {
             selectedType = value;
           }
         },
@@ -429,22 +437,21 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
         GetTitle(title: "Choose Profile Image"),
         thumbnailImage == null && thumbnailImageUrl == null && (thumbnailImageUrl?.isEmpty ?? true)
             ? InkWell(
-          onTap: () async {
-            await addThumbnailImage();
-          },
-          child: const EmptyImageViewBox(),
-        )
+                onTap: () async {
+                  await addThumbnailImage();
+                },
+                child: const EmptyImageViewBox(),
+              )
             : CommonImageViewBox(
-          imageAsBytes: thumbnailImage,
-          url: thumbnailImageUrl,
-          rightOnTap: () {
-            thumbnailImage = null;
-            thumbnailImageUrl = null;
-            setState(() {});
-          },
-        ),
+                imageAsBytes: thumbnailImage,
+                url: thumbnailImageUrl,
+                rightOnTap: () {
+                  thumbnailImage = null;
+                  thumbnailImageUrl = null;
+                  setState(() {});
+                },
+              ),
       ],
     );
   }
-
 }

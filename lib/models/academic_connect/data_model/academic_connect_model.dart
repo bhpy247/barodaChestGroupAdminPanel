@@ -1,40 +1,35 @@
-import 'package:baroda_chest_group_admin/configs/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../utils/parsing_helper.dart';
 
-class EventModel {
+class AcademicConnectModel {
   String id = "";
   String title = "";
   String address = "";
   String description = "";
   String imageUrl = "";
-  String youtubeUrl = "";
-  String eventType = "";
+  String downloadUrl = "";
   int totalSeats = 0;
   Timestamp? createdTime;
   Timestamp? updatedTime;
   Timestamp? eventStartDate;
   Timestamp? eventEndDate;
-  List<String> registeredUser = [];
 
-  EventModel({
+  AcademicConnectModel({
     this.id = "",
     this.title = "",
     this.address = "",
     this.description = "",
     this.totalSeats = 0,
     this.imageUrl = "",
-    this.youtubeUrl = "",
-    this.eventType = EventTypes.typeSocial,
+    this.downloadUrl = "",
     this.createdTime,
     this.updatedTime,
     this.eventEndDate,
-    this.eventStartDate,
-    this.registeredUser = const []
+    this.eventStartDate
   });
 
-  EventModel.fromMap(Map<String, dynamic> map) {
+  AcademicConnectModel.fromMap(Map<String, dynamic> map) {
     initializeFromMap(map);
   }
 
@@ -45,14 +40,12 @@ class EventModel {
   void initializeFromMap(Map<String, dynamic> map) {
     id = ParsingHelper.parseStringMethod(map['id']);
     imageUrl = ParsingHelper.parseStringMethod(map['imageUrl']);
-    youtubeUrl = ParsingHelper.parseStringMethod(map['youtubeUrl']);
     address = ParsingHelper.parseStringMethod(map['address']);
     title = ParsingHelper.parseStringMethod(map['title']);
     totalSeats = ParsingHelper.parseIntMethod(map['totalSeats']);
-    eventType = ParsingHelper.parseStringMethod(map['eventType']);
+    downloadUrl = ParsingHelper.parseStringMethod(map['downloadUrl']);
     description = ParsingHelper.parseStringMethod(map['description']);
     createdTime = ParsingHelper.parseTimestampMethod(map['createdTime']);
-    registeredUser = ParsingHelper.parseListMethod(map['registeredUser']);
     updatedTime = ParsingHelper.parseTimestampMethod(map['updatedTime']);
     eventStartDate = ParsingHelper.parseTimestampMethod(map['eventStartDate']);
     eventEndDate = ParsingHelper.parseTimestampMethod(map['eventEndDate']);
@@ -63,11 +56,9 @@ class EventModel {
       "id" : id,
       "title" : title,
       "imageUrl" : imageUrl,
+      "downloadUrl" : downloadUrl,
       "address" : address,
-      "youtubeUrl" : youtubeUrl,
-      "registeredUser" : registeredUser,
       "description" : description,
-      "eventType" : eventType,
       "createdTime" : createdTime,
       "totalSeats" : totalSeats,
       "updatedTime" : updatedTime,

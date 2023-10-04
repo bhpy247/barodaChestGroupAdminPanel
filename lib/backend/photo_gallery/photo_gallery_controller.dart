@@ -135,7 +135,7 @@ class PhotoGalleryController {
             'objectid': caseOfMonth.id,
             'title': title,
             'description': description,
-            'type': NotificationTypes.editCourse,
+            'type': NotificationTypes.event,
             'imageurl': image,
           },
         );

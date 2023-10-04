@@ -59,7 +59,6 @@ class _UserListScreenState extends State<UserListScreen> with MySafeState {
     "Sr No.",
     "Name",
     "Mobile",
-    "Courses",
   ];
   late Future<void> futureGetData;
 
@@ -261,27 +260,27 @@ class _UserListScreenState extends State<UserListScreen> with MySafeState {
                 textOverFlow: TextOverflow.ellipsis,
               ),
             ),
-            MyTableCellModel(
-              flex: flexes[3],
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: getCourseEnrollmentWidget(
-                      count: activeCoursesLength,
-                      isActive: true,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Flexible(
-                    child: getCourseEnrollmentWidget(
-                      count: expiredCoursesLength,
-                      isActive: false,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // MyTableCellModel(
+            //   flex: flexes[3],
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       Flexible(
+            //         child: getCourseEnrollmentWidget(
+            //           count: activeCoursesLength,
+            //           isActive: true,
+            //         ),
+            //       ),
+            //       const SizedBox(width: 10),
+            //       Flexible(
+            //         child: getCourseEnrollmentWidget(
+            //           count: expiredCoursesLength,
+            //           isActive: false,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
             // MyTableCellModel(
             //   flex: flexes[5],

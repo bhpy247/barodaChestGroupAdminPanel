@@ -28,7 +28,7 @@ class CaseOfMonthScreenNavigator extends StatefulWidget {
   _CaseOfMonthScreenNavigatorState createState() => _CaseOfMonthScreenNavigatorState();
 }
 
-class _CaseOfMonthScreenNavigatorState extends State<CaseOfMonthScreenNavigator>  {
+class _CaseOfMonthScreenNavigatorState extends State<CaseOfMonthScreenNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -60,6 +60,69 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
     );
   }
 
+  void showSimpleSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text(
+          message,
+          style: themeData.textTheme.titleSmall?.merge(TextStyle(color: themeData.colorScheme.onPrimary)),
+        ),
+        backgroundColor: themeData.colorScheme.primary,
+      ),
+    );
+  }
+
+  Future<void> deleteEvent(CaseOfMonthModel caseOfMonthModel) async {
+    if (caseOfMonthModel.id.isEmpty) {
+      return;
+    }
+
+    dynamic value = await showDialog(
+      context: context,
+      builder: (context) {
+        return CommonPopup(
+          text: "Are you sure want to delete this Event?",
+          leftText: "Cancel",
+          rightText: "Delete",
+          rightOnTap: () {
+            Navigator.pop(context, true);
+          },
+          rightBackgroundColor: Colors.red,
+        );
+      },
+    );
+
+    if (value != true) {
+      return;
+    }
+
+    isLoading = true;
+    mySetState();
+
+    bool isDeleted = await FirebaseNodes.caseOfMonthDocumentReference(courseId: caseOfMonthModel.id).delete().then((value) {
+      return true;
+    }).catchError((e, s) {
+      MyPrint.printOnConsole("Error in Deleting Case Of the Month:$e");
+      MyPrint.printOnConsole(s);
+
+      return false;
+    });
+
+    isLoading = false;
+    if (isDeleted) {
+      caseOfMonthProvider.caseOfMonthList.getList().remove(caseOfMonthModel);
+    }
+
+    mySetState();
+
+    if (isDeleted) {
+      showSimpleSnackbar("Deleted");
+    } else {
+      showSimpleSnackbar("Error in Deleting Case Of the Month");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +142,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
       );
     }*/
   }
+
   @override
   Widget build(BuildContext context) {
     super.pageBuild();
@@ -203,7 +267,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Want to Edit course?",
+                text: "Want to Edit Case Of The Month?",
                 rightText: "Yes",
                 rightOnTap: () async {
                   Navigator.pop(context);
@@ -262,7 +326,7 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
                   ),
                   const SizedBox(height: 10),
                   CommonText(
-                    text: caseOfMonthModel.createdTime == null ? 'Created Date: No Data' : 'Created Date: ${DateFormat("dd-MMM-yyyy").format(caseOfMonthModel.createdTime!.toDate())}',
+                    text: caseOfMonthModel.createdTime == null ? 'Created Date: No Data' : 'Case Of The Month Date: ${DateFormat("dd-MMM-yyyy").format(caseOfMonthModel.caseOfMonthDate!.toDate())}',
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     textOverFlow: TextOverflow.ellipsis,
@@ -271,6 +335,26 @@ class _CaseOfMonthListState extends State<CaseOfMonthList> with MySafeState {
               ),
               const SizedBox(width: 20),
               const Spacer(),
+              const SizedBox(
+                width: 15,
+              ),
+              const InkWell(
+                child: Icon(Icons.edit),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              InkWell(
+                onTap: () async {
+                  await deleteEvent(caseOfMonthModel);
+                  getData(
+                    isRefresh: true,
+                    isFromCache: false,
+                    isNotify: false,
+                  );
+                },
+                child: const Icon(Icons.delete),
+              ),
               // InkWell(
               //   onTap: (){},
               //   child: Tooltip(

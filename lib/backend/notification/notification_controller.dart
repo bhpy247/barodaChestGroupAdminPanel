@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 
 import '../../configs/constants.dart';
+import '../../models/common/data_model/notification_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
 
@@ -97,7 +98,7 @@ class NotificationController {
       //Notification------------------------------------------------------------------------------------------
       Map<String, dynamic> notificationMap = {'title': title, 'body': description};
       //if(tag != null && tag.isNotEmpty) notificationMap['tag'] = tag;
-      if (image.isNotEmpty) notificationMap['image'] = image;
+      // if (image.isNotEmpty) notificationMap['image'] = image;
       //Notification------------------------------------------------------------------------------------------
 
       //Android Configs----------------------------------------------------------------------------------------
@@ -133,7 +134,7 @@ class NotificationController {
       AccessToken? accessToken = await getAccessToken();
       if (accessToken == null || accessToken.data.isEmpty || accessToken.type.isEmpty) return;
 
-      var url = 'https://fcm.googleapis.com/v1/projects/edu-app-bb24b/messages:send';
+      var url = 'https://fcm.googleapis.com/v1/projects/${AppConstants.firebaseProjectId}/messages:send';
       var header = {
         "Content-Type": "application/json",
         "Authorization": "${accessToken.type} ${accessToken.data}",
@@ -170,6 +171,16 @@ class NotificationController {
       MyPrint.printOnConsole("Error in Sending Notification 2:$e");
       MyPrint.printOnConsole(s);
       // AnalyticsController().recordError(e, s, reason: "Error in Sending Push Notification 2");
+    }
+  }
+
+  Future<void> addNotificationToFirebase(NotificationModel model) async {
+    String tag = MyUtils.getNewId();
+    try {
+       FirebaseNodes.notificationsDocumentReference(courseId: model.id).set(model.toMap());
+    } catch(e,s){
+      MyPrint.printOnConsole("Error in NotificationController().addNotificationToFirebase():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
     }
   }
 }

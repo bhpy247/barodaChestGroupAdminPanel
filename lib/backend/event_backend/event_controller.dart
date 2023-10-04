@@ -1,5 +1,7 @@
 
+import 'package:baroda_chest_group_admin/models/common/data_model/notification_model.dart';
 import 'package:baroda_chest_group_admin/models/event/data_model/event_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../configs/constants.dart';
 import '../../configs/typedefs.dart';
@@ -113,33 +115,42 @@ class EventController {
   // }
 
   Future<void> addEventToFirebase({required EventModel eventModel, bool isAdInProvider = false}) async {
-    MyPrint.printOnConsole("CourseController().addCourseToFirebase() called with courseModel:'$eventModel'");
+    MyPrint.printOnConsole("EventController().addEventToFirebase() called with courseModel:'$eventModel'");
 
     try {
+      String title = "Event Updated";
+      String description = "'${eventModel.title}' Event has been updated";
+      String image = eventModel.imageUrl;
+
       await eventRepository.addEventRepo(eventModel);
       if (isAdInProvider) {
+        title = "Event Added";
+        description = "'${eventModel.title}' Event has been added";
         eventProvider.addCourseModelInCourseList(eventModel);
-      } else {
-        String title = "Event updated";
-        String description = "'${eventModel.title}' Event has been added";
-        String image = eventModel.imageUrl;
-
-        NotificationController.sendNotificationMessage2(
-          title: title,
-          description: description,
-          image: image,
-          topic: eventModel.id,
-          data: <String, dynamic>{
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'id': '1',
-            'objectid': eventModel.id,
-            'title': title,
-            'description': description,
-            'type': NotificationTypes.editCourse,
-            'imageurl': image,
-          },
-        );
       }
+      NotificationController.sendNotificationMessage2(
+        title: title,
+        description: description,
+        image: image,
+        topic: NotificationTopicType.admin,
+        data: <String, dynamic>{
+          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          'id': '1',
+          'objectid': eventModel.id,
+          'title': title,
+          'description': description,
+          'type': NotificationTypes.event,
+          'imageurl': image,
+        },
+      );
+      NotificationModel notificationModel = NotificationModel(
+        createdTime: Timestamp.now(),
+        title: eventModel.title,
+        id: MyUtils.getNewId(),
+        description: eventModel.description,
+        notificationType: NotificationTypes.event,
+      );
+      NotificationController().addNotificationToFirebase(notificationModel);
     } catch (e, s) {
       MyPrint.printOnConsole('Error in Add Course to Firebase in Course Controller $e');
       MyPrint.printOnConsole(s);

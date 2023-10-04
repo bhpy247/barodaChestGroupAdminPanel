@@ -52,6 +52,7 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
 
   TextEditingController eventCaseNameController = TextEditingController();
   TextEditingController googleDriveUrlController = TextEditingController();
+  TextEditingController startDateTimeController = TextEditingController();
   TextEditingController eventDescriptionController = TextEditingController();
 
   String? thumbnailImageUrl;
@@ -70,6 +71,8 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       eventDescriptionController.text = pageCourseModel!.description;
       thumbnailImageUrl = pageCourseModel!.image;
       googleDriveUrlController.text = pageCourseModel!.downloadUrl;
+      eventStartDate = pageCourseModel!.caseOfMonthDate!.toDate();
+      startDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(pageCourseModel!.caseOfMonthDate!);
     }
   }
 
@@ -158,6 +161,8 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       caseName: eventCaseNameController.text.trim(),
       description: eventDescriptionController.text.trim(),
       image: thumbnailImageUrl?.trim() ?? "",
+      downloadUrl: googleDriveUrlController.text.trim(),
+      caseOfMonthDate: Timestamp.fromDate(eventStartDate!),
       createdTime: pageCourseModel?.createdTime ?? Timestamp.now(),
       updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
@@ -175,6 +180,8 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       model.image = caseOfMonthModel.image;
       model.createdTime = caseOfMonthModel.createdTime;
       model.updatedTime = caseOfMonthModel.updatedTime;
+      model.downloadUrl = caseOfMonthModel.downloadUrl;
+      model.caseOfMonthDate = caseOfMonthModel.caseOfMonthDate;
     }
 
     setState(() {
@@ -183,6 +190,29 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
     if (context.mounted && context.checkMounted()) {
       MyToast.showSuccess(context: context, msg: pageCourseModel == null ? 'Case Of Month Added Successfully' : 'Case Of Month Edited Successfully');
     }
+  }
+
+  Future<void> startDateTime() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2025).add(Duration(days: 365)),
+    );
+    if (context.mounted && context.checkMounted()) {
+
+      if (pickedDate != null) {
+        eventStartDate = pickedDate;
+        if (eventStartDate != null) {
+          startDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(
+            Timestamp.fromDate(
+              eventStartDate!,
+            ),
+          );
+        }
+      }
+    }
+    mySetState();
   }
 
   @override
@@ -225,6 +255,12 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
                             const SizedBox(height: 20),
                             getDescriptionTextField(),
                             const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(child: getStartDateTextField()),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
                             chooseThumbnailImageAndBackgroundColor(),
                             const SizedBox(height: 30),
                             submitButton(),
@@ -244,6 +280,31 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
       },
     );
   }
+
+  Widget getStartDateTextField() {
+    return InkWell(
+      onTap: () {
+        startDateTime();
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GetTitle(title: "Select Case Of Month date"),
+          CommonTextFormField(
+            enabled: false,
+            controller: startDateTimeController,
+            hintText: "Select Case Of Month date",
+            minLines: 1,
+            validator: (value) {
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget getCaseName() {
     return Row(
@@ -361,7 +422,7 @@ class _AddCaseOfMonthScreenState extends State<AddCaseOfMonthScreen> with MySafe
             context: context,
             builder: (context) {
               return CommonPopup(
-                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this chapter?",
+                text: "Are you sure want to ${pageCourseModel == null ? "Add" : "Edit"} this Case Of The Month?",
                 leftText: "No",
                 rightText: "Yes",
                 rightOnTap: () {
