@@ -246,6 +246,7 @@ class SharePreferenceKeys {
 class NotificationTypes {
   static const String event = "Event";
   static const String caseOfMonth = "Case Of The Month";
+  static const String news = "News";
   static const String updatedCaseOfMonth = "updatedCaseOfMonth";
   static const String courseValidityExtended = "courseValidityExtended";
   static const String courseAssigned = "courseAssigned";

@@ -56,7 +56,7 @@ class _SideBarState extends State<SideBar> {
                 ),
               ),
             ),
-            Image.asset("assets/sidebar_image.png")
+            // Image.asset("assets/sidebar_image.png")
           ],
         ),
       ),

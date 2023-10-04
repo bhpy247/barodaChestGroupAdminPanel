@@ -5,11 +5,13 @@ import 'package:baroda_chest_group_admin/backend/contact_us/contact_us_provider.
 import 'package:baroda_chest_group_admin/backend/event_backend/event_provider.dart';
 import 'package:baroda_chest_group_admin/backend/guide_line/guideline_provider.dart';
 import 'package:baroda_chest_group_admin/backend/member/member_provider.dart';
+import 'package:baroda_chest_group_admin/backend/membership_form/membership_form_provider.dart';
 import 'package:baroda_chest_group_admin/backend/photo_gallery/photo_gallery_provider.dart';
 import 'package:baroda_chest_group_admin/utils/WebPageLoad/web_page_load_non_web.dart';
 import 'package:baroda_chest_group_admin/views/common/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
 
 import 'backend/admin/admin_provider.dart';
@@ -19,8 +21,6 @@ import 'backend/common/common_provider.dart';
 import 'backend/common/menu_provider.dart';
 import 'backend/navigation/navigation_controller.dart';
 import 'backend/users_backend/user_provider.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
-
 import 'firebase_options.dart';
 
 void main() async {
@@ -58,6 +58,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<GuidelineProvider>(create: (_) => GuidelineProvider(), lazy: false),
         ChangeNotifierProvider<ContactUsProvider>(create: (_) => ContactUsProvider(), lazy: false),
         ChangeNotifierProvider<AcademicConnectProvider>(create: (_) => AcademicConnectProvider(), lazy: false),
+        ChangeNotifierProvider<MembershipFormProvider>(create: (_) => MembershipFormProvider(), lazy: false),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

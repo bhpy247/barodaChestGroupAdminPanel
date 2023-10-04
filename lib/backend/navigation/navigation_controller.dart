@@ -1,4 +1,3 @@
-import 'package:baroda_chest_group_admin/models/profile/data_model/contact_us_model.dart';
 import 'package:baroda_chest_group_admin/views/brochure/screens/add_brochure.dart';
 import 'package:baroda_chest_group_admin/views/brochure/screens/brochure_list.dart';
 import 'package:baroda_chest_group_admin/views/caseofmonth/screens/add_case_of_month.dart';
@@ -8,6 +7,7 @@ import 'package:baroda_chest_group_admin/views/contact_us/screen/contact_us_scre
 import 'package:baroda_chest_group_admin/views/guideLine/screen/add_guideline_screen.dart';
 import 'package:baroda_chest_group_admin/views/guideLine/screen/guideline_screen.dart';
 import 'package:baroda_chest_group_admin/views/photoGallery/screens/add_photo_gallery.dart';
+import 'package:baroda_chest_group_admin/views/send_notification/screen/sendNotificationScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +23,7 @@ import '../../views/events/screens/event_list_screen.dart';
 import '../../views/homescreen/screens/home_page.dart';
 import '../../views/member/screen/add_member.dart';
 import '../../views/member/screen/member_list.dart';
+import '../../views/membershipForm/screen/memberShip_form_screeen.dart';
 import '../../views/photoGallery/screens/photo_gallery_screeen.dart';
 import '../../views/users/screens/user_profile_view.dart';
 import '../../views/users/screens/users_list_screen.dart';
@@ -49,10 +50,13 @@ class NavigationController {
   static final GlobalKey<NavigatorState> brochureScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> guidelineScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> contactUsScreenNavigator = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> membershipScreenNavigator = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> sendNotificationScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> photoGalleryScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> memberScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> committeeMemberScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> academicConnectScreenNavigator = GlobalKey<NavigatorState>();
+
   // static final GlobalKey<NavigatorState> photoGalleryScreenNavigator = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> userScreenNavigator = GlobalKey<NavigatorState>();
 
@@ -405,6 +409,70 @@ class NavigationController {
       case "/":
         {
           page = const ContactUsScreen();
+          break;
+        }
+    }
+
+    if (page != null) {
+      return PageRouteBuilder(
+        pageBuilder: (c, a1, a2) => page!,
+        //transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
+        transitionsBuilder: (c, anim, a2, child) => SizeTransition(sizeFactor: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 0),
+        settings: settings,
+      );
+    }
+    return null;
+  }
+
+  static Route? onMembershipFormScreenRoutes(RouteSettings settings) {
+    MyPrint.printOnConsole("On Contact Us Generated Routes called for ${settings.name} with arguments:${settings.arguments}");
+
+    if (kIsWeb) {
+      if (!["/", SplashScreen.routeName].contains(settings.name) && NavigationController.checkDataAndNavigateToSplashScreen()) {
+        return null;
+      }
+    }
+
+    MyPrint.printOnConsole("First Page:$isFirst");
+    Widget? page;
+
+    switch (settings.name) {
+      case "/":
+        {
+          page = const MembershipFormScreen();
+          break;
+        }
+    }
+
+    if (page != null) {
+      return PageRouteBuilder(
+        pageBuilder: (c, a1, a2) => page!,
+        //transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
+        transitionsBuilder: (c, anim, a2, child) => SizeTransition(sizeFactor: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 0),
+        settings: settings,
+      );
+    }
+    return null;
+  }
+
+  static Route? onSendNotificationScreenRoutes(RouteSettings settings) {
+    MyPrint.printOnConsole("On Contact Us Generated Routes called for ${settings.name} with arguments:${settings.arguments}");
+
+    if (kIsWeb) {
+      if (!["/", SplashScreen.routeName].contains(settings.name) && NavigationController.checkDataAndNavigateToSplashScreen()) {
+        return null;
+      }
+    }
+
+    MyPrint.printOnConsole("First Page:$isFirst");
+    Widget? page;
+
+    switch (settings.name) {
+      case "/":
+        {
+          page = const SendNotificationScreen();
           break;
         }
     }

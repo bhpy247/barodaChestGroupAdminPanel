@@ -7,7 +7,9 @@ import 'package:baroda_chest_group_admin/views/contact_us/screen/contact_us_scre
 import 'package:baroda_chest_group_admin/views/events/screens/event_list_screen.dart';
 import 'package:baroda_chest_group_admin/views/guideLine/screen/guideline_screen.dart';
 import 'package:baroda_chest_group_admin/views/member/screen/member_list.dart';
+import 'package:baroda_chest_group_admin/views/membershipForm/screen/memberShip_form_screeen.dart';
 import 'package:baroda_chest_group_admin/views/photoGallery/screens/photo_gallery_screeen.dart';
+import 'package:baroda_chest_group_admin/views/send_notification/screen/sendNotificationScreen.dart';
 import 'package:baroda_chest_group_admin/views/users/screens/users_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -18,7 +20,6 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/my_print.dart';
 import '../../common/components/app_response.dart';
 import '../../common/components/side_bar.dart';
-import '../../feedback/screens/feedbacks_list_screen.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = '/HomePage';
@@ -127,7 +128,8 @@ class _HomePageState extends State<HomePage> {
               tabNumber = 8;
             });
           },
-        ), DrawerListTile(
+        ),
+        DrawerListTile(
           title: "Academic Connect",
           icon: MdiIcons.imageAlbum,
           press: () {
@@ -242,7 +244,25 @@ class _HomePageState extends State<HomePage> {
                       icon: Icons.library_books_outlined,
                       press: () {
                         setState(() {
-                          tabNumber=10;
+                          tabNumber = 10;
+                        });
+                      },
+                    ),
+                    DrawerListTile(
+                      title: "Membership Requests",
+                      icon: Icons.library_books_outlined,
+                      press: () {
+                        setState(() {
+                          tabNumber = 11;
+                        });
+                      },
+                    ),
+                    DrawerListTile(
+                      title: "Flash News",
+                      icon: Icons.library_books_outlined,
+                      press: () {
+                        setState(() {
+                          tabNumber = 12;
                         });
                       },
                     ),
@@ -308,13 +328,21 @@ class _HomePageState extends State<HomePage> {
           return const BannerScreen();
         }
 
-        case 9:
+      case 9:
         {
           return const AcademicConnectNavigator();
         }
-        case 10:
+      case 10:
         {
           return const UserScreenNavigator();
+        }
+      case 11:
+        {
+          return const MembershipFormScreenNavigator();
+        }
+      case 12:
+        {
+          return const SendNotificationScreenNavigator();
         }
 
       // case 4:{
