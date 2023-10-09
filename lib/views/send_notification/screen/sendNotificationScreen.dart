@@ -2,6 +2,7 @@ import 'package:baroda_chest_group_admin/backend/notification/notification_contr
 import 'package:baroda_chest_group_admin/configs/constants.dart';
 import 'package:baroda_chest_group_admin/models/common/data_model/notification_model.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
+import 'package:baroda_chest_group_admin/utils/my_utils.dart';
 import 'package:baroda_chest_group_admin/views/common/components/common_button.dart';
 import 'package:flutter/material.dart';
 
@@ -58,7 +59,8 @@ class _SendNotificationScreenState extends State<SendNotificationScreen> with My
         'type': NotificationTypes.news,
       },
     );
-    NotificationModel noficationModel = NotificationModel(description: descriptionController.text.trim(), title: titleController.text.trim(), notificationType: NotificationTypes.news);
+    NotificationModel noficationModel =
+        NotificationModel(description: descriptionController.text.trim(), title: titleController.text.trim(), notificationType: NotificationTypes.news, id: MyUtils.getNewId());
     await NotificationController().addNotificationToFirebase(noficationModel);
 
     isLoading = false;
