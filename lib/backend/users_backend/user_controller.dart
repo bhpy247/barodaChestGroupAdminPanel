@@ -3,11 +3,15 @@ import 'package:baroda_chest_group_admin/backend/users_backend/user_repository.d
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../configs/constants.dart';
+import '../../configs/typedefs.dart';
 import '../../models/common/data_model/new_document_data_model.dart';
+import '../../models/event/data_model/event_model.dart';
 import '../../models/user/data_model/user_course_enrollment_model.dart';
 import '../../models/user/data_model/user_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
+import '../common/firestore_controller.dart';
+import '../event_backend/event_provider.dart';
 import '../notification/notification_controller.dart';
 
 class UserController {
@@ -45,7 +49,7 @@ class UserController {
       userProvider.setIsUsersLoading(true, isNotify: isNotify);
 
       Query<Map<String, dynamic>> query =
-          FirebaseNodes.usersCollectionReference.limit(5).orderBy("createdTime", descending: true);
+      FirebaseNodes.usersCollectionReference.limit(5).orderBy("createdTime", descending: true);
 
       //For Last Document
       DocumentSnapshot<Map<String, dynamic>>? snapshot = userProvider.getLastDocument;
@@ -80,66 +84,150 @@ class UserController {
     }
   }
 
-  Future<bool> assignCourse({required UserModel userModel, required String courseId, required int validityDays, String courseName = "", String courseImage = ""}) async {
+  Future<UserModel> getUserFromUserIdFirebase({ required String userId, bool isRefresh = true, bool isNotify = true}) async {
     String tag = MyUtils.getNewId();
-    MyPrint.printOnConsole("UserController().assignCourse() called for CourseId:$courseId, validityDays:$validityDays", tag: tag);
 
-    if (userModel.id.isEmpty) {
-      MyPrint.printOnConsole("Returning from UserController().assignCourse() because userId is empty", tag: tag);
-      return false;
+    try {
+      MyPrint.printOnConsole("UserController().getUserFromUserIdFirebase called with getEventOnBasisOfId:$userId", tag: tag);
+
+
+      MyPrint.printOnConsole("Refresh", tag: tag);
+
+      MyFirestoreCollectionReference docs = FirestoreController.collectionReference(collectionName: FirebaseNodes.usersCollection);
+
+      //For Last Document
+      MyFirestoreDocumentSnapshot? snapshot = await docs.doc(userId).get();
+      MyPrint.printOnConsole("Documents Length in Firestore for events:${snapshot.id}", tag: tag);
+      UserModel userModel = UserModel();
+
+      if (snapshot.exists) {
+        userModel = UserModel.fromMap(snapshot.data()!);
+      }
+      MyPrint.printOnConsole("Final events Length From Firestore:${userModel.id}", tag: tag);
+      return userModel;
+    }
+    catch (e, s) {
+      MyPrint.printOnConsole("Error in UserController().getUserFromUserIdFirebase():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+      return UserModel();
+    }
+  }
+
+    Future<bool> assignCourse({required UserModel userModel, required String courseId, required int validityDays, String courseName = "", String courseImage = ""}) async {
+      String tag = MyUtils.getNewId();
+      MyPrint.printOnConsole("UserController().assignCourse() called for CourseId:$courseId, validityDays:$validityDays", tag: tag);
+
+      if (userModel.id.isEmpty) {
+        MyPrint.printOnConsole("Returning from UserController().assignCourse() because userId is empty", tag: tag);
+        return false;
+      }
+
+      if (courseId.isEmpty) {
+        MyPrint.printOnConsole("Returning from UserController().assignCourse() because courseId is empty", tag: tag);
+        return false;
+      }
+
+      if (validityDays <= 0) {
+        MyPrint.printOnConsole("Returning from UserController().assignCourse() because validityDays are <= 0", tag: tag);
+        return false;
+      }
+
+      UserCourseEnrollmentModel userCourseEnrollmentModel = UserCourseEnrollmentModel.fromMap(userModel.myCoursesData[courseId]?.toMap() ?? {});
+      userCourseEnrollmentModel.courseId = courseId;
+
+      NewDocumentDataModel newDocumentDataModel = await MyUtils.getNewDocIdAndTimeStamp(isGetTimeStamp: true);
+      MyPrint.printOnConsole("New Timestamp:${newDocumentDataModel.timestamp.toDate().toString()}", tag: tag);
+
+      bool isPlanActive = false;
+
+      if (userCourseEnrollmentModel.activatedDate != null &&
+          userCourseEnrollmentModel.expiryDate != null &&
+          userCourseEnrollmentModel.activatedDate!.toDate().isBefore(userCourseEnrollmentModel.expiryDate!.toDate()) &&
+          newDocumentDataModel.timestamp.toDate().isBefore(userCourseEnrollmentModel.expiryDate!.toDate())) {
+        isPlanActive = true;
+      }
+      MyPrint.printOnConsole("isPlanActive:$isPlanActive", tag: tag);
+
+      if (isPlanActive) {
+        userCourseEnrollmentModel.validityInDays += validityDays;
+        userCourseEnrollmentModel.expiryDate =
+            Timestamp.fromDate(userCourseEnrollmentModel.activatedDate!.toDate().add(Duration(days: userCourseEnrollmentModel.validityInDays)));
+      } else {
+        userCourseEnrollmentModel.activatedDate = newDocumentDataModel.timestamp;
+        userCourseEnrollmentModel.validityInDays = validityDays;
+        userCourseEnrollmentModel.expiryDate = Timestamp.fromDate(newDocumentDataModel.timestamp.toDate().add(Duration(days: validityDays)));
+      }
+      MyPrint.printOnConsole("new userCourseEnrollmentModel:$userCourseEnrollmentModel", tag: tag);
+
+      bool isUpdated = await userRepository.updateUserCourseEnrollmentData(userId: userModel.id, enrollmentModel: userCourseEnrollmentModel);
+      MyPrint.printOnConsole("isUpdated:$isUpdated", tag: tag);
+
+      if (isUpdated) {
+        UserCourseEnrollmentModel? enrollmentModel = userModel.myCoursesData[courseId];
+        if (enrollmentModel != null) {
+          enrollmentModel.activatedDate = userCourseEnrollmentModel.activatedDate;
+          enrollmentModel.validityInDays = userCourseEnrollmentModel.validityInDays;
+          enrollmentModel.expiryDate = userCourseEnrollmentModel.expiryDate;
+
+          String title = isPlanActive ? "Course Validity Extended" : "New Course Assigned";
+          String description = isPlanActive
+              ? "${courseName.isNotEmpty ? "'$courseName' " : ""}Course validity has been extended by Admin"
+              : "${courseName.isNotEmpty ? "'$courseName' " : ""}Course has been assigned to you";
+          String image = courseImage;
+
+          NotificationController.sendNotificationMessage2(
+            title: title,
+            description: description,
+            image: image,
+            topic: userModel.id,
+            collapseKey: courseId,
+            tag: courseId,
+            data: <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'objectid': courseId,
+              'title': title,
+              'description': description,
+              'type': isPlanActive ? NotificationTypes.courseValidityExtended : NotificationTypes.courseAssigned,
+              'imageurl': image,
+            },
+          );
+        } else {
+          userModel.myCoursesData[courseId] = userCourseEnrollmentModel;
+        }
+        MyPrint.printOnConsole("final userCourseEnrollmentModel:${userModel.myCoursesData[courseId]}", tag: tag);
+      }
+
+      return isUpdated;
     }
 
-    if (courseId.isEmpty) {
-      MyPrint.printOnConsole("Returning from UserController().assignCourse() because courseId is empty", tag: tag);
-      return false;
-    }
+    Future<bool> expireUserCourse({required UserModel userModel, required String courseId, String courseName = "", String courseImage = ""}) async {
+      String tag = MyUtils.getNewId();
+      MyPrint.printOnConsole("UserController().expireUserCourse() called for CourseId:$courseId", tag: tag);
 
-    if (validityDays <= 0) {
-      MyPrint.printOnConsole("Returning from UserController().assignCourse() because validityDays are <= 0", tag: tag);
-      return false;
-    }
+      UserCourseEnrollmentModel userCourseEnrollmentModel = UserCourseEnrollmentModel.fromMap(userModel.myCoursesData[courseId]?.toMap() ?? {});
+      userCourseEnrollmentModel.courseId = courseId;
 
-    UserCourseEnrollmentModel userCourseEnrollmentModel = UserCourseEnrollmentModel.fromMap(userModel.myCoursesData[courseId]?.toMap() ?? {});
-    userCourseEnrollmentModel.courseId = courseId;
+      userCourseEnrollmentModel.activatedDate = null;
+      userCourseEnrollmentModel.validityInDays = 0;
+      userCourseEnrollmentModel.expiryDate = null;
 
-    NewDocumentDataModel newDocumentDataModel = await MyUtils.getNewDocIdAndTimeStamp(isGetTimeStamp: true);
-    MyPrint.printOnConsole("New Timestamp:${newDocumentDataModel.timestamp.toDate().toString()}", tag: tag);
+      bool isUpdated = await userRepository.updateUserCourseEnrollmentData(userId: userModel.id, enrollmentModel: userCourseEnrollmentModel);
+      MyPrint.printOnConsole("isUpdated:$isUpdated", tag: tag);
 
-    bool isPlanActive = false;
+      if (isUpdated) {
+        UserCourseEnrollmentModel? enrollmentModel = userModel.myCoursesData[courseId];
+        if (enrollmentModel != null) {
+          enrollmentModel.activatedDate = userCourseEnrollmentModel.activatedDate;
+          enrollmentModel.validityInDays = userCourseEnrollmentModel.validityInDays;
+          enrollmentModel.expiryDate = userCourseEnrollmentModel.expiryDate;
+        } else {
+          userModel.myCoursesData[courseId] = userCourseEnrollmentModel;
+        }
+        MyPrint.printOnConsole("final userCourseEnrollmentModel:${userModel.myCoursesData[courseId]}", tag: tag);
 
-    if (userCourseEnrollmentModel.activatedDate != null &&
-        userCourseEnrollmentModel.expiryDate != null &&
-        userCourseEnrollmentModel.activatedDate!.toDate().isBefore(userCourseEnrollmentModel.expiryDate!.toDate()) &&
-        newDocumentDataModel.timestamp.toDate().isBefore(userCourseEnrollmentModel.expiryDate!.toDate())) {
-      isPlanActive = true;
-    }
-    MyPrint.printOnConsole("isPlanActive:$isPlanActive", tag: tag);
-
-    if (isPlanActive) {
-      userCourseEnrollmentModel.validityInDays += validityDays;
-      userCourseEnrollmentModel.expiryDate =
-          Timestamp.fromDate(userCourseEnrollmentModel.activatedDate!.toDate().add(Duration(days: userCourseEnrollmentModel.validityInDays)));
-    } else {
-      userCourseEnrollmentModel.activatedDate = newDocumentDataModel.timestamp;
-      userCourseEnrollmentModel.validityInDays = validityDays;
-      userCourseEnrollmentModel.expiryDate = Timestamp.fromDate(newDocumentDataModel.timestamp.toDate().add(Duration(days: validityDays)));
-    }
-    MyPrint.printOnConsole("new userCourseEnrollmentModel:$userCourseEnrollmentModel", tag: tag);
-
-    bool isUpdated = await userRepository.updateUserCourseEnrollmentData(userId: userModel.id, enrollmentModel: userCourseEnrollmentModel);
-    MyPrint.printOnConsole("isUpdated:$isUpdated", tag: tag);
-
-    if (isUpdated) {
-      UserCourseEnrollmentModel? enrollmentModel = userModel.myCoursesData[courseId];
-      if (enrollmentModel != null) {
-        enrollmentModel.activatedDate = userCourseEnrollmentModel.activatedDate;
-        enrollmentModel.validityInDays = userCourseEnrollmentModel.validityInDays;
-        enrollmentModel.expiryDate = userCourseEnrollmentModel.expiryDate;
-
-        String title = isPlanActive ? "Course Validity Extended" : "New Course Assigned";
-        String description = isPlanActive
-            ? "${courseName.isNotEmpty ? "'$courseName' " : ""}Course validity has been extended by Admin"
-            : "${courseName.isNotEmpty ? "'$courseName' " : ""}Course has been assigned to you";
+        String title = "Course Expired";
+        String description = "${courseName.isNotEmpty ? "$courseName " : ""}Course has been expired by Admin";
         String image = courseImage;
 
         NotificationController.sendNotificationMessage2(
@@ -155,84 +243,29 @@ class UserController {
             'objectid': courseId,
             'title': title,
             'description': description,
-            'type': isPlanActive ? NotificationTypes.courseValidityExtended : NotificationTypes.courseAssigned,
+            'type': NotificationTypes.courseExpired,
             'imageurl': image,
           },
         );
-      } else {
-        userModel.myCoursesData[courseId] = userCourseEnrollmentModel;
       }
-      MyPrint.printOnConsole("final userCourseEnrollmentModel:${userModel.myCoursesData[courseId]}", tag: tag);
+
+      return isUpdated;
     }
 
-    return isUpdated;
-  }
+    Future<bool> unAssignCourse({required UserModel userModel, required String courseId}) async {
+      String tag = MyUtils.getNewId();
+      MyPrint.printOnConsole("UserController().unAssignCourse() called for CourseId:$courseId", tag: tag);
 
-  Future<bool> expireUserCourse({required UserModel userModel, required String courseId, String courseName = "", String courseImage = ""}) async {
-    String tag = MyUtils.getNewId();
-    MyPrint.printOnConsole("UserController().expireUserCourse() called for CourseId:$courseId", tag: tag);
+      bool isUpdated = await userRepository.terminateUserCourseEnrollmentData(userId: userModel.id, courseId: courseId);
+      MyPrint.printOnConsole("isUpdated:$isUpdated", tag: tag);
 
-    UserCourseEnrollmentModel userCourseEnrollmentModel = UserCourseEnrollmentModel.fromMap(userModel.myCoursesData[courseId]?.toMap() ?? {});
-    userCourseEnrollmentModel.courseId = courseId;
-
-    userCourseEnrollmentModel.activatedDate = null;
-    userCourseEnrollmentModel.validityInDays = 0;
-    userCourseEnrollmentModel.expiryDate = null;
-
-    bool isUpdated = await userRepository.updateUserCourseEnrollmentData(userId: userModel.id, enrollmentModel: userCourseEnrollmentModel);
-    MyPrint.printOnConsole("isUpdated:$isUpdated", tag: tag);
-
-    if (isUpdated) {
-      UserCourseEnrollmentModel? enrollmentModel = userModel.myCoursesData[courseId];
-      if (enrollmentModel != null) {
-        enrollmentModel.activatedDate = userCourseEnrollmentModel.activatedDate;
-        enrollmentModel.validityInDays = userCourseEnrollmentModel.validityInDays;
-        enrollmentModel.expiryDate = userCourseEnrollmentModel.expiryDate;
-      } else {
-        userModel.myCoursesData[courseId] = userCourseEnrollmentModel;
+      if (isUpdated) {
+        userModel.myCoursesData.remove(courseId);
+        MyPrint.printOnConsole("final userCourseEnrollmentModel:${userModel.myCoursesData[courseId]}", tag: tag);
       }
-      MyPrint.printOnConsole("final userCourseEnrollmentModel:${userModel.myCoursesData[courseId]}", tag: tag);
 
-      String title = "Course Expired";
-      String description = "${courseName.isNotEmpty ? "$courseName " : ""}Course has been expired by Admin";
-      String image = courseImage;
-
-      NotificationController.sendNotificationMessage2(
-        title: title,
-        description: description,
-        image: image,
-        topic: userModel.id,
-        collapseKey: courseId,
-        tag: courseId,
-        data: <String, dynamic>{
-          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-          'id': '1',
-          'objectid': courseId,
-          'title': title,
-          'description': description,
-          'type': NotificationTypes.courseExpired,
-          'imageurl': image,
-        },
-      );
+      return isUpdated;
     }
-
-    return isUpdated;
-  }
-
-  Future<bool> unAssignCourse({required UserModel userModel, required String courseId}) async {
-    String tag = MyUtils.getNewId();
-    MyPrint.printOnConsole("UserController().unAssignCourse() called for CourseId:$courseId", tag: tag);
-
-    bool isUpdated = await userRepository.terminateUserCourseEnrollmentData(userId: userModel.id, courseId: courseId);
-    MyPrint.printOnConsole("isUpdated:$isUpdated", tag: tag);
-
-    if (isUpdated) {
-      userModel.myCoursesData.remove(courseId);
-      MyPrint.printOnConsole("final userCourseEnrollmentModel:${userModel.myCoursesData[courseId]}", tag: tag);
-    }
-
-    return isUpdated;
-  }
 
 /*Future<void> EnableDisableUserInFirebase({required Map<String,dynamic> editableData,required String id,required int listIndex}) async {
 
@@ -248,4 +281,4 @@ class UserController {
       MyPrint.printOnConsole(s);
     }
   }*/
-}
+  }

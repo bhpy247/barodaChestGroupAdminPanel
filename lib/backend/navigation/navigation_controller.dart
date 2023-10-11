@@ -142,7 +142,7 @@ class NavigationController {
     switch (settings.name) {
       case "/":
         {
-          page = const CourseListScreen();
+          page = const EventListScreen();
           break;
         }
 

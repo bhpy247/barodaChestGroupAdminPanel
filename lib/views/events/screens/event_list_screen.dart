@@ -1,12 +1,16 @@
 import 'package:baroda_chest_group_admin/backend/event_backend/event_provider.dart';
 import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments.dart';
+import 'package:baroda_chest_group_admin/backend/users_backend/user_controller.dart';
 import 'package:baroda_chest_group_admin/models/course/data_model/course_model.dart';
 import 'package:baroda_chest_group_admin/models/event/data_model/event_model.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
+import 'package:baroda_chest_group_admin/views/events/componants/create_pdf.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
 import '../../../backend/event_backend/event_controller.dart';
@@ -41,14 +45,14 @@ class _EventScreenNavigatorState extends State<EventScreenNavigator> {
   }
 }
 
-class CourseListScreen extends StatefulWidget {
-  const CourseListScreen({Key? key}) : super(key: key);
+class EventListScreen extends StatefulWidget {
+  const EventListScreen({Key? key}) : super(key: key);
 
   @override
-  State<CourseListScreen> createState() => _CourseListScreenState();
+  State<EventListScreen> createState() => _EventListScreenState();
 }
 
-class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
+class _EventListScreenState extends State<EventListScreen> with MySafeState {
   ScrollController scrollController = ScrollController();
   bool isLoading = false;
 
@@ -337,14 +341,44 @@ class _CourseListScreenState extends State<CourseListScreen> with MySafeState {
                       maxLines: 2,
                       textOverFlow: TextOverflow.ellipsis,
                     ),
+                    if (eventModel.registeredUser.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Row(
+                          children: [
+                            CommonText(
+                              text: "Enrolled Users : ${eventModel.registeredUser.length}",
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              textOverFlow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            InkWell(
+                                onTap: () async {
+                                  final pdf = await CreatePdf().generatePdf(userController: UserController(userProvider: null), registeredUsrModelList: eventModel.registeredUser, eventModel: eventModel);
+                                  Printing.layoutPdf(onLayout: (format) => pdf!);
+                                },
+                                child: const Icon(
+                                  Icons.download,
+                                  color: AppColor.bgSideMenu,
+                                )),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
-              SizedBox(width: 15,),
-              InkWell(
-                child: const Icon(Icons.edit),
+              const SizedBox(
+                width: 15,
               ),
-              SizedBox(width: 15,),
+              const InkWell(
+                child: Icon(Icons.edit),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
               InkWell(
                   onTap: () async {
                     await deleteEvent(eventModel);
