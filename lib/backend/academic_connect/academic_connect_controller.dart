@@ -1,7 +1,9 @@
 import 'package:baroda_chest_group_admin/models/academic_connect/data_model/academic_connect_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../configs/constants.dart';
 import '../../configs/typedefs.dart';
+import '../../models/common/data_model/notification_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
 import '../notification/notification_controller.dart';
@@ -115,29 +117,37 @@ class AcademicConnectController {
 
     try {
       await academicConnectRepository.addAcademicConnectRepo(academicConnectModel);
+
       if (isAdInProvider) {
         academicConnectProvider.addCourseModelInCourseList(academicConnectModel);
-      } else {
-        String title = "Academic Connect updated";
-        String description = "'${academicConnectModel.title}' Academic connect has been added";
-        String image = academicConnectModel.imageUrl;
-
-        NotificationController.sendNotificationMessage2(
-          title: title,
-          description: description,
-          image: image,
-          topic: academicConnectModel.id,
-          data: <String, dynamic>{
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'id': '1',
-            'objectid': academicConnectModel.id,
-            'title': title,
-            'description': description,
-            'type': NotificationTypes.event,
-            'imageurl': image,
-          },
-        );
       }
+      String title = "Academic Connect ${isAdInProvider ? "Added" : "Updated"}";
+      String description = "'${academicConnectModel.title}' Academic connect has been ${isAdInProvider ? "added" : "updated"}";
+      String image = academicConnectModel.imageUrl;
+
+      NotificationController.sendNotificationMessage2(
+        title: title,
+        description: description,
+        image: image,
+        topic: NotificationTopicType.admin,
+        data: <String, dynamic>{
+          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          'id': '1',
+          'objectid': academicConnectModel.id,
+          'title': title,
+          'description': description,
+          'type': NotificationTopicType.admin,
+          'imageurl': image,
+        },
+      );
+      NotificationModel notificationModel = NotificationModel(
+        createdTime: Timestamp.now(),
+        title: title,
+        id: MyUtils.getNewId(),
+        description: academicConnectModel.description,
+        notificationType: NotificationTypes.academicConnect,
+      );
+      NotificationController().addNotificationToFirebase(notificationModel);
     } catch (e, s) {
       MyPrint.printOnConsole('Error in Add Course to Firebase in Course Controller $e');
       MyPrint.printOnConsole(s);

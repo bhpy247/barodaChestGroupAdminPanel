@@ -245,6 +245,8 @@ class SharePreferenceKeys {
 
 class NotificationTypes {
   static const String event = "Event";
+  static const String guideLine = "GuideLine";
+  static const String academicConnect = "Academic Connect";
   static const String caseOfMonth = "Case Of The Month";
   static const String news = "News";
   static const String updatedCaseOfMonth = "updatedCaseOfMonth";
@@ -280,14 +282,20 @@ class AppAssets{
   static const String background_ring_top = 'assets/images/ring_topbar.png';
 
 }
+
 class MySharePreferenceKeys {
   static const String isLogin = "isLogin";
 }
+
 String ISFIRST = "isfirst";
 String LAST_OPENED_TIME = "last_opened_time";
 
 class EventTypes {
   static const String typeAcademic = "Academic";
   static const String typeSocial = "Social";
+}
 
+class AccountType {
+  static String consultant = "Consultant";
+  static String student = "Student";
 }

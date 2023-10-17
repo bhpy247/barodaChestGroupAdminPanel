@@ -252,13 +252,16 @@ class _GuideLineScreenState extends State<GuideLineScreen> with MySafeState{
                   ],
                 ),
               ),
-              if(guidelineModel.downloadUrl.isNotEmpty)
+              const Icon(Icons.edit),
+              const SizedBox(
+                width: 20,
+              ),
+              if (guidelineModel.downloadUrl.isNotEmpty)
                 InkWell(
-                    onTap:(){
-
+                    onTap: () {
                       MyUtils.launchUrlString(url: guidelineModel.downloadUrl);
                     },
-                    child: Icon(Icons.remove_red_eye))
+                    child: const Icon(Icons.remove_red_eye))
             ],
           ),
         ),

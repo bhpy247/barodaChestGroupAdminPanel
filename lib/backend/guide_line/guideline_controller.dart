@@ -1,7 +1,8 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../configs/constants.dart';
 import '../../configs/typedefs.dart';
+import '../../models/common/data_model/notification_model.dart';
 import '../../models/profile/data_model/guideline_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
@@ -118,29 +119,36 @@ class GuidelineController {
       await guidelineRepository.addGuidelineRepo(guideline);
       if (isAdInProvider) {
         guidelineProvider.addGuidelineModelInCourseList(guideline);
-      } else {
-        String title = "Case of month updated";
-        String description = "'${guideline.name}' Case of month has been added";
-        String image = guideline.downloadUrl;
-
-        NotificationController.sendNotificationMessage2(
-          title: title,
-          description: description,
-          image: image,
-          topic: guideline.id,
-          data: <String, dynamic>{
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'id': '1',
-            'objectid': guideline.id,
-            'title': title,
-            'description': description,
-            'type': NotificationTypes.event,
-            'imageurl': image,
-          },
-        );
       }
+      String title = "New Guideline ${isAdInProvider ? "Added" : "Updated"}";
+      String description = "'${guideline.name}' guideline has been ${isAdInProvider ? "Added" : "Updated"}";
+      String image = guideline.downloadUrl;
+
+      NotificationController.sendNotificationMessage2(
+        title: title,
+        description: description,
+        image: image,
+        topic: NotificationTopicType.admin,
+        data: <String, dynamic>{
+          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          'id': '1',
+          'objectid': guideline.id,
+          'title': title,
+          'description': description,
+          'type': NotificationTopicType.admin,
+          'imageurl': image,
+        },
+      );
+      NotificationModel notificationModel = NotificationModel(
+        createdTime: Timestamp.now(),
+        title: title,
+        id: MyUtils.getNewId(),
+        description: guideline.downloadUrl,
+        notificationType: NotificationTypes.guideLine,
+      );
+      NotificationController().addNotificationToFirebase(notificationModel);
     } catch (e, s) {
-      MyPrint.printOnConsole('Error in Add Course to Firebase in Course Controller $e');
+      MyPrint.printOnConsole('Error in Add GuideLine to Firebase in GuideLine Controller $e');
       MyPrint.printOnConsole(s);
     }
   }

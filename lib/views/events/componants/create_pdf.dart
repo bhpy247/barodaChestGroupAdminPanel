@@ -1,9 +1,6 @@
-import 'package:baroda_chest_group_admin/backend/admin/admin_controller.dart';
-import 'package:baroda_chest_group_admin/backend/admin/admin_provider.dart';
 import 'package:baroda_chest_group_admin/backend/users_backend/user_controller.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:baroda_chest_group_admin/configs/constants.dart';
 import 'package:flutter/services.dart';
-
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -38,9 +35,7 @@ class CreatePdf {
         pw.Page(
           pageFormat: PdfPageFormat.a4,
           build: (context) {
-            return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               pw.Text("${eventModel.title}", style: TextStyle()),
               SizedBox(height: 20),
               pw.Table(
@@ -48,7 +43,6 @@ class CreatePdf {
                 children: [
                   pw.TableRow(
                     children: [
-
                       pw.Expanded(
                         child: pw.Padding(
                           padding: const EdgeInsets.all(5),
@@ -59,6 +53,16 @@ class CreatePdf {
                           child: pw.Padding(
                         padding: const EdgeInsets.all(5),
                         child: pw.Text("Mobile"),
+                      )),
+                      pw.Expanded(
+                          child: pw.Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: pw.Text("Email"),
+                      )),
+                      pw.Expanded(
+                          child: pw.Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: pw.Text("Speciality"),
                       )),
                     ],
                   ),
@@ -80,6 +84,18 @@ class CreatePdf {
                           child: pw.Padding(
                             padding: const EdgeInsets.all(5),
                             child: pw.Text(userModelList[index].mobileNumber),
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: pw.Text(userModelList[index].email),
+                          ),
+                        ),
+                        pw.Expanded(
+                          child: pw.Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: pw.Text(userModelList[index].accountType == AccountType.student ? AccountType.student : userModelList[index].speciality),
                           ),
                         )
                       ],

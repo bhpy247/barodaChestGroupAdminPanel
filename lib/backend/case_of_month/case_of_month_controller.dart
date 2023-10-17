@@ -1,12 +1,10 @@
 
 import 'package:baroda_chest_group_admin/models/caseofmonth/data_model/case_of_month_model.dart';
-import 'package:baroda_chest_group_admin/models/event/data_model/event_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../configs/constants.dart';
 import '../../configs/typedefs.dart';
 import '../../models/common/data_model/notification_model.dart';
-import '../../models/course/data_model/course_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
 import '../notification/notification_controller.dart';
@@ -120,36 +118,36 @@ class CaseOfMonthController {
 
     try {
       await caseOfMonthRepository.addCaseOfMonthRepo(caseOfMonth);
-      if (isAdInProvider) {
-        caseOfMonthProvider.addCaseOfMonthModelInCourseList(caseOfMonth);
-        String title = "Case of month added";
-        String description = "'${caseOfMonth.caseName}' Case of month has been added";
-        String image = caseOfMonth.image;
+      // if (isAdInProvider) {
+      caseOfMonthProvider.addCaseOfMonthModelInCourseList(caseOfMonth);
+      String title = "Case of month  ${isAdInProvider ? "added" : "updated"}";
+      String description = "'${caseOfMonth.caseName}' Case of month has been ${isAdInProvider ? "added" : "updated"}";
+      String image = caseOfMonth.image;
 
-        NotificationController.sendNotificationMessage2(
-          title: title,
-          description: description,
-          image: image,
-          topic: NotificationTopicType.admin,
-          data: <String, dynamic>{
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'id': '1',
-            'objectid': caseOfMonth.id,
-            'title': title,
-            'description': description,
-            'type': NotificationTypes.caseOfMonth,
-            'imageurl': image,
-          },
+      NotificationController.sendNotificationMessage2(
+        title: title,
+        description: description,
+        image: image,
+        topic: NotificationTopicType.admin,
+        data: <String, dynamic>{
+          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          'id': '1',
+          'objectid': caseOfMonth.id,
+          'title': title,
+          'description': description,
+          'type': NotificationTopicType.admin,
+          'imageurl': image,
+        },
         );
         NotificationModel notificationModel = NotificationModel(
           createdTime: Timestamp.now(),
-          title: caseOfMonth.caseName,
-          id: MyUtils.getNewId(),
-          description: caseOfMonth.description,
-          notificationType: NotificationTypes.caseOfMonth,
-        );
+        title: title,
+        id: MyUtils.getNewId(),
+        description: caseOfMonth.description,
+        notificationType: NotificationTypes.caseOfMonth,
+      );
         NotificationController().addNotificationToFirebase(notificationModel);
-      }
+      // }
     } catch (e, s) {
       MyPrint.printOnConsole('Error in Add Course to Firebase in Course Controller $e');
       MyPrint.printOnConsole(s);
