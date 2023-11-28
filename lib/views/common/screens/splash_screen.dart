@@ -67,6 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     await Future.wait([
       adminController.getPropertyDataAndSetInProvider(),
+      adminController.getAssetsUploadModelAndSaveInProvider(),
       adminController.getNewTimestampAndSaveInProvider(),
     ]);
 

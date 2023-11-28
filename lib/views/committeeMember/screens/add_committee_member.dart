@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_controller.dart';
 import 'package:baroda_chest_group_admin/backend/committee_member/committee_member_provider.dart';
 import 'package:baroda_chest_group_admin/models/profile/data_model/committee_member_model.dart';
@@ -7,23 +5,18 @@ import 'package:baroda_chest_group_admin/utils/extensions.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../backend/common/firebase_storage_controller.dart';
-import '../../../backend/member/member_controller.dart';
-import '../../../backend/member/member_provider.dart';
 import '../../../backend/navigation/navigation_arguments.dart';
-import '../../../models/profile/data_model/member_model.dart';
+import '../../../configs/constants.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/my_print.dart';
 import '../../../utils/my_toast.dart';
 import '../../../utils/my_utils.dart';
 import '../../common/components/common_button.dart';
-import '../../common/components/common_image_view_box.dart';
 import '../../common/components/common_popup.dart';
 import '../../common/components/common_progress_indicator.dart';
+import '../../common/components/common_text.dart';
 import '../../common/components/common_text_formfield.dart';
 import '../../common/components/get_title.dart';
 import '../../common/components/header_widget.dart';
@@ -52,10 +45,7 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
   TextEditingController emailController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   String? selectedType;
-
-  String? thumbnailImageUrl;
-  Uint8List? thumbnailImage;
-  String? thumbnailImageName;
+  String? selectedMainType;
 
   CommitteeMemberModel? pageCommitteeMemberModel;
 
@@ -67,71 +57,9 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
     if (pageCommitteeMemberModel != null) {
       nameController.text = pageCommitteeMemberModel!.name;
       addressController.text = pageCommitteeMemberModel!.type;
+      selectedMainType = pageCommitteeMemberModel!.mainType;
+      selectedType = pageCommitteeMemberModel!.type;
     }
-  }
-
-  Future<void> addThumbnailImage() async {
-    setState(() {});
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      String path = pickedFile.path;
-      CroppedFile? croppedFile = await ImageCropper().cropImage(
-        compressFormat: ImageCompressFormat.jpg,
-        sourcePath: path,
-        aspectRatio: const CropAspectRatio(ratioX: 9, ratioY: 16),
-        cropStyle: CropStyle.rectangle,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
-            toolbarColor: AppColor.bgSideMenu,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.square,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            minimumAspectRatio: 1.0,
-            aspectRatioLockEnabled: true,
-            aspectRatioPickerButtonHidden: true,
-          ),
-          // ignore: use_build_context_synchronously
-          WebUiSettings(
-            context: context,
-            presentStyle: CropperPresentStyle.dialog,
-            boundary: const CroppieBoundary(
-              width: 530,
-              height: 330,
-            ),
-            viewPort: const CroppieViewPort(width: 400, height: 225, type: 'rectangular'),
-            enableOrientation: true,
-            enableExif: true,
-            enableZoom: true,
-            showZoomer: true,
-          ),
-        ],
-      );
-      if (croppedFile != null) {
-        thumbnailImage = await croppedFile.readAsBytes();
-      }
-      thumbnailImageName = pickedFile.name;
-
-      if (mounted) setState(() {});
-    }
-  }
-
-  Future<String?> uploadFileToFirebaseStorage({
-    required String courseId,
-    required String imageName,
-  }) async {
-    String? firebaseStorageImageUrl;
-    String finalFileName = MyUtils().getStorageUploadImageUrl(nativeImageName: imageName);
-    if (thumbnailImage != null) {
-      firebaseStorageImageUrl = await FireBaseStorageController().uploadFilesToFireBaseStorage(data: thumbnailImage!, eventId: courseId, fileName: finalFileName);
-      MyPrint.printOnConsole("Method after await");
-    }
-    return firebaseStorageImageUrl;
   }
 
   Future<void> addCommitteeMemberToFirebase() async {
@@ -144,9 +72,6 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
       courseId = MyUtils.getNewId(isFromUUuid: false);
     }
 
-    if (thumbnailImageName != null) {
-      thumbnailImageUrl = await uploadFileToFirebaseStorage(courseId: courseId, imageName: thumbnailImageName!);
-    }
 
     // if (thumbnailImageUrl == null) {
     //   // ignore: use_build_context_synchronously
@@ -158,7 +83,7 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
       id: courseId.trim(),
       name: nameController.text.trim(),
       type: selectedType ?? "",
-      profileUrl: thumbnailImageUrl?.trim() ?? "",
+      mainType: selectedMainType ?? "",
       createdTime: pageCommitteeMemberModel?.createdTime ?? Timestamp.now(),
       // updatedTime: pageCourseModel != null ? Timestamp.now() : null,
     );
@@ -173,7 +98,7 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
       CommitteeMemberModel model = pageCommitteeMemberModel!;
       model.name = memberModel.name;
       model.type = memberModel.type;
-      model.profileUrl = model.profileUrl;
+      model.mainType = memberModel.mainType;
       model.createdTime = memberModel.createdTime;
     }
 
@@ -223,8 +148,8 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
                             const SizedBox(height: 20),
                             getDropDownForType(),
                             const SizedBox(height: 20),
-                            chooseThumbnailImageAndBackgroundColor(),
-                            const SizedBox(height: 30),
+                            getMainTypeSelection(),
+                            const SizedBox(height: 20),
                             submitButton(),
                             const SizedBox(height: 40),
                           ],
@@ -265,6 +190,54 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget getMainTypeSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GetTitle(title: "Select Committee Or Sub-Committee"),
+        Row(
+          children: [
+            // SizedBox(width: 20,),
+            Row(
+              children: [
+                Radio(
+                  activeColor: AppColor.bgSideMenu,
+                  value: CommitteeMemberType.committee,
+                  groupValue: selectedMainType,
+                  onChanged: (String? val) {
+                    selectedMainType = val ?? "";
+                    mySetState();
+                  },
+                ),
+                CommonText(
+                  text: CommitteeMemberType.committee,
+                  fontSize: 17,
+                )
+              ],
+            ),
+            SizedBox(
+              width: 20,
+            ),
+            Row(
+              children: [
+                Radio(
+                  activeColor: AppColor.bgSideMenu,
+                  value: CommitteeMemberType.subCommittee,
+                  groupValue: selectedMainType,
+                  onChanged: (String? val) {
+                    selectedMainType = val ?? "";
+                    mySetState();
+                  },
+                ),
+                CommonText(text: CommitteeMemberType.subCommittee, fontSize: 17)
+              ],
+            )
+          ],
         ),
       ],
     );
@@ -369,88 +342,68 @@ class _AddCommitteeMemberScreenState extends State<AddCommitteeMemberScreen> wit
   }
 
   Widget getDropDownForType() {
-    return Card(
-      color: Colors.grey[50],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      elevation: 2,
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          filled: true,
-          hintText: 'Select type',
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-            fontSize: 15,
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 21),
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.transparent),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.transparent),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.black.withOpacity(.75),
-              width: 2,
-            ),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          border: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.transparent),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        items: <String>[
-          'Patron',
-          'President',
-          'Vice President',
-          'Secretary',
-          'Treasurer',
-          'Member Radiology',
-          'Social Media & Website',
-          "Charitable Activity",
-          "Academics",
-          "Member",
-        ].map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        value: selectedType,
-        onChanged: (String? value) {
-          if (value != null) {
-            selectedType = value;
-          }
-        },
-      ),
-    );
-  }
-
-  Widget chooseThumbnailImageAndBackgroundColor() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GetTitle(title: "Choose Profile Image"),
-        thumbnailImage == null && thumbnailImageUrl == null && (thumbnailImageUrl?.isEmpty ?? true)
-            ? InkWell(
-                onTap: () async {
-                  await addThumbnailImage();
-                },
-                child: const EmptyImageViewBox(),
-              )
-            : CommonImageViewBox(
-                imageAsBytes: thumbnailImage,
-                url: thumbnailImageUrl,
-                rightOnTap: () {
-                  thumbnailImage = null;
-                  thumbnailImageUrl = null;
-                  setState(() {});
-                },
+        GetTitle(title: "Select Type"),
+        Card(
+          color: Colors.grey[50],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          elevation: 2,
+          child: DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              filled: true,
+              hintText: 'Select type',
+              hintStyle: const TextStyle(
+                color: Colors.grey,
+                fontSize: 15,
               ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 21),
+              enabledBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.transparent),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.transparent),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.black.withOpacity(.75),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              border: OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.transparent),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            items: <String>[
+              'Patron',
+              'President',
+              'Vice President',
+              'Secretary',
+              'Treasurer',
+              'Member Radiology',
+              'Social Media & Website',
+              "Charitable Activity",
+              "Academics",
+              "Member",
+            ].map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            value: selectedType,
+            onChanged: (String? value) {
+              if (value != null) {
+                selectedType = value;
+              }
+            },
+          ),
+        ),
       ],
     );
   }

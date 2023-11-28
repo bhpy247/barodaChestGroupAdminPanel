@@ -15,6 +15,10 @@ class AdminProvider extends CommonProvider{
       value: null,
       notify: notify,
     );
+    assetsUploadedModel = CommonProviderPrimitiveParameter<AssetsUploadModel?>(
+      value: null,
+      notify: notify,
+    );
     faqList = CommonProviderListParameter<FAQModel>(
       list: <FAQModel>[],
       notify: notify,
@@ -26,6 +30,8 @@ class AdminProvider extends CommonProvider{
   }
 
   late CommonProviderPrimitiveParameter<PropertyModel?> propertyModel;
+  late CommonProviderPrimitiveParameter<AssetsUploadModel?> assetsUploadedModel;
+
   late CommonProviderPrimitiveParameter<Timestamp?> timeStamp;
 
   late CommonProviderListParameter<FAQModel> faqList;
@@ -34,7 +40,7 @@ class AdminProvider extends CommonProvider{
   void reset({bool isNotify = true}) {
     propertyModel.set(value: null, isNotify: false);
     timeStamp.set(value: null, isNotify: false);
-
+    assetsUploadedModel.set(value: null, isNotify: false);
     faqList.setList(list: [], isClear: true, isNotify: false);
     feedbackList.setList(list: [], isClear: true, isNotify: isNotify);
   }

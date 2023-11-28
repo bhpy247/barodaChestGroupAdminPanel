@@ -99,18 +99,6 @@ class BrochureController {
     }
   }
 
-  // Future<void> enableDisableCourseInFirebase({required Map<String, dynamic> editableData, required String id, required int listIndex}) async {
-  //   try {
-  //     await FirebaseNodes.coursesDocumentReference(courseId: id).update(editableData).then((value) {
-  //       MyPrint.printOnConsole("user data: ${editableData["enabled"]}");
-  //       courseProvider.updateEnableDisableOfList(editableData["enabled"], listIndex);
-  //     });
-  //   } catch (e, s) {
-  //     MyPrint.printOnConsole("Error in Enable Disable User in firebase in User Controller $e");
-  //     MyPrint.printOnConsole(s);
-  //   }
-  // }
-
   Future<void> addBrochureToFirebase({required BrochureModel caseOfMonth, bool isAdInProvider = false}) async {
     MyPrint.printOnConsole("CourseController().addCourseToFirebase() called with courseModel:'$caseOfMonth'");
 
@@ -144,41 +132,4 @@ class BrochureController {
       MyPrint.printOnConsole(s);
     }
   }
-
-  // Future<List<CourseModel>> getUserBrochureList({bool isRefresh = true, required List<String> myCourseIds, bool isNotify = true}) async {
-  //   String tag = MyUtils.getNewId();
-  //   MyPrint.printOnConsole("CourseController().getUserBrochureList called with isRefresh:$isRefresh, myCourseIds:$myCourseIds, isNotify:$isNotify", tag: tag);
-  //
-  //   EventProvider provider = courseProvider;
-  //
-  //   if (!isRefresh) {
-  //     MyPrint.printOnConsole("Returning Cached Data", tag: tag);
-  //     return provider.events.getList(isNewInstance: true);
-  //   }
-  //
-  //   if (provider.isMyBrochureFirstTimeLoading.get()) {
-  //     MyPrint.printOnConsole("Returning from CourseController().getUserBrochureList() because myBrochure already fetching", tag: tag);
-  //     return provider.events.getList(isNewInstance: true);
-  //   }
-  //
-  //   MyPrint.printOnConsole("Refresh", tag: tag);
-  //   provider.isMyBrochureFirstTimeLoading.set(value: true, isNotify: false);
-  //   provider.events.setList(list: <CourseModel>[], isNotify: isNotify);
-  //
-  //   try {
-  //     List<CourseModel> list = await courseRepository.getBrochureListFromIdsList(courseIds: myCourseIds);
-  //
-  //     provider.events.setList(list: list, isClear: true, isNotify: false);
-  //     provider.isMyBrochureFirstTimeLoading.set(value: false, isNotify: true);
-  //     MyPrint.printOnConsole("Final Brochure Length From Firestore:${list.length}", tag: tag);
-  //     MyPrint.printOnConsole("Final Brochure Length in Provider:${provider.myBrochureLength}", tag: tag);
-  //     return list;
-  //   } catch (e, s) {
-  //     MyPrint.printOnConsole("Error in CourseController().getUserBrochureList():$e", tag: tag);
-  //     MyPrint.printOnConsole(s, tag: tag);
-  //     provider.events.setList(list: [], isClear: true, isNotify: false);
-  //     provider.isMyBrochureFirstTimeLoading.set(value: false, isNotify: false);
-  //     return [];
-  //   }
-  // }
 }

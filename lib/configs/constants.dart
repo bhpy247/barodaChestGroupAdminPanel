@@ -65,26 +65,36 @@ class FirebaseNodes {
   static MyFirestoreDocumentReference adminDocumentReference({String? documentId}) => FirestoreController.documentReference(
     collectionName: adminCollection,
     documentId: documentId,
-  );
+      );
 
   //region Property Document
   static const String propertyDocument = "property";
 
   static MyFirestoreDocumentReference get adminPropertyDocumentReference => adminDocumentReference(
-    documentId: propertyDocument,
-  );
+        documentId: propertyDocument,
+      );
+
+  //endregion
+
+  // region Property Document
+  static const String assetsUploadedDocument = "assets";
+
+  static MyFirestoreDocumentReference get assetsUploadedPropertyDocumentReference => adminDocumentReference(
+        documentId: assetsUploadedDocument,
+      );
+
   //endregion
 
   //region Event Collection
   static const String eventCollection = 'events';
 
   static MyFirestoreCollectionReference get eventCollectionReference => FirestoreController.collectionReference(
-    collectionName: FirebaseNodes.eventCollection,
-  );
+        collectionName: FirebaseNodes.eventCollection,
+      );
 
   static MyFirestoreDocumentReference eventsDocumentReference({String? courseId}) => FirestoreController.documentReference(
-    collectionName: FirebaseNodes.eventCollection,
-    documentId: courseId,
+        collectionName: FirebaseNodes.eventCollection,
+        documentId: courseId,
   );
   //endregion
   //
@@ -293,6 +303,11 @@ String LAST_OPENED_TIME = "last_opened_time";
 class EventTypes {
   static const String typeAcademic = "Academic";
   static const String typeSocial = "Social";
+}
+
+class CommitteeMemberType {
+  static String committee = "Committee";
+  static String subCommittee = "Sub Committee";
 }
 
 class AccountType {

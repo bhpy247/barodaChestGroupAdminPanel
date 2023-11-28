@@ -13,6 +13,7 @@ import '../../../backend/navigation/navigation_type.dart';
 import '../../../configs/constants.dart';
 import '../../../models/brochure/data_model/brochure_model.dart';
 import '../../../utils/app_colors.dart';
+import '../../../utils/my_print.dart';
 import '../../common/components/common_button.dart';
 import '../../common/components/common_popup.dart';
 import '../../common/components/common_progress_indicator.dart';
@@ -27,7 +28,7 @@ class BrochureScreenNavigator extends StatefulWidget {
   _BrochureScreenNavigatorState createState() => _BrochureScreenNavigatorState();
 }
 
-class _BrochureScreenNavigatorState extends State<BrochureScreenNavigator>  {
+class _BrochureScreenNavigatorState extends State<BrochureScreenNavigator> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -59,6 +60,69 @@ class _BrochureListScreenState extends State<BrochureListScreen> with MySafeStat
     );
   }
 
+  Future<void> deleteEvent(BrochureModel brochureModel) async {
+    if (brochureModel.id.isEmpty) {
+      return;
+    }
+
+    dynamic value = await showDialog(
+      context: context,
+      builder: (context) {
+        return CommonPopup(
+          text: "Are you sure want to delete this brochure?",
+          leftText: "Cancel",
+          rightText: "Delete",
+          rightOnTap: () {
+            Navigator.pop(context, true);
+          },
+          rightBackgroundColor: Colors.red,
+        );
+      },
+    );
+
+    if (value != true) {
+      return;
+    }
+
+    isLoading = true;
+    mySetState();
+
+    bool isDeleted = await FirebaseNodes.brochureDocumentReference(courseId: brochureModel.id).delete().then((value) {
+      return true;
+    }).catchError((e, s) {
+      MyPrint.printOnConsole("Error in Deleting Member:$e");
+      MyPrint.printOnConsole(s);
+
+      return false;
+    });
+
+    isLoading = false;
+    if (isDeleted) {
+      brochureProvider.brochureList.getList().remove(brochureModel);
+    }
+
+    mySetState();
+
+    if (isDeleted) {
+      showSimpleSnackbar("Deleted");
+    } else {
+      showSimpleSnackbar("Error in Deleting Member");
+    }
+  }
+
+  void showSimpleSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1000),
+        content: Text(
+          message,
+          style: themeData.textTheme.titleSmall?.merge(TextStyle(color: themeData.colorScheme.onPrimary)),
+        ),
+        backgroundColor: themeData.colorScheme.primary,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +142,7 @@ class _BrochureListScreenState extends State<BrochureListScreen> with MySafeStat
       );
     }*/
   }
+
   @override
   Widget build(BuildContext context) {
     super.pageBuild();
@@ -111,14 +176,14 @@ class _BrochureListScreenState extends State<BrochureListScreen> with MySafeStat
               ),
             ),
             const SizedBox(height: 20),
-            Expanded(child: getCourseList(topContext: context)),
+            Expanded(child: getBrochureList(topContext: context)),
           ],
         ),
       ),
     );
   }
 
-  Widget getCourseList({required BuildContext topContext}) {
+  Widget getBrochureList({required BuildContext topContext}) {
     return Consumer(builder: (BuildContext context, BrochureProvider brochureProvider, Widget? child) {
       if (brochureProvider.isBrochureFirstTimeLoading.get()) {
         return const Center(child: CommonProgressIndicator());
@@ -185,14 +250,14 @@ class _BrochureListScreenState extends State<BrochureListScreen> with MySafeStat
 
             BrochureModel model = caseOfMonth[index];
 
-            return singleCourse(model, index, topContext);
+            return singleBrochure(model, index, topContext);
           },
         ),
       );
     });
   }
 
-  Widget singleCourse(BrochureModel caseOfMonthModel, int index, BuildContext topContext) {
+  Widget singleBrochure(BrochureModel caseOfMonthModel, int index, BuildContext topContext) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: InkWell(
@@ -251,13 +316,26 @@ class _BrochureListScreenState extends State<BrochureListScreen> with MySafeStat
                   ],
                 ),
               ),
-              if(caseOfMonthModel.brochureUrl.isNotEmpty)
-              InkWell(
-                  onTap:(){
-
+              if (caseOfMonthModel.brochureUrl.isNotEmpty)
+                InkWell(
+                  onTap: () {
                     MyUtils.launchUrlString(url: caseOfMonthModel.brochureUrl);
                   },
-                  child: Icon(Icons.remove_red_eye))
+                  child: const Icon(Icons.remove_red_eye),
+                ),
+              const SizedBox(
+                width: 10,
+              ),
+              InkWell(
+                  onTap: () async {
+                    await deleteEvent(caseOfMonthModel);
+                    getData(
+                      isRefresh: true,
+                      isFromCache: false,
+                      isNotify: false,
+                    );
+                  },
+                  child: const Icon(Icons.delete))
             ],
           ),
         ),

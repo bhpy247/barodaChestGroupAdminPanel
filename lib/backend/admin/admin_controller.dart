@@ -1,14 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../configs/constants.dart';
-import '../../configs/typedefs.dart';
 import '../../models/admin/property_model.dart';
 import '../../models/common/data_model/new_document_data_model.dart';
-import '../../models/other/data_model/faq_model.dart';
 import '../../models/other/data_model/feedback_model.dart';
 import '../../utils/my_print.dart';
 import '../../utils/my_utils.dart';
-import '../../utils/parsing_helper.dart';
 import 'admin_provider.dart';
 import 'admin_repository.dart';
 
@@ -41,6 +35,21 @@ class AdminController {
     MyPrint.printOnConsole("Final propertyModel:${adminProvider.propertyModel.get()}", tag: tag);
   }
 
+  Future<void> getAssetsUploadModelAndSaveInProvider() async {
+    String tag = MyUtils.getNewId();
+    MyPrint.printOnConsole("AdminController().getPropertyModelAndSaveInProvider() called", tag: tag);
+
+    try {
+      AssetsUploadModel? assetsUploadedModel = await adminRepository.getAssetsModel();
+      adminProvider.assetsUploadedModel.set(value: assetsUploadedModel);
+
+      MyPrint.printOnConsole("assetsUploadedModel:$assetsUploadedModel", tag: tag);
+    } catch (e, s) {
+      MyPrint.printOnConsole("Error in AdminController().getAssetsUploadModelAndSaveInProvider():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+    }
+  }
+
   Future<void> updatePropertyDataAndSetInProvider() async {
     String tag = MyUtils.getUniqueIdFromUuid();
     MyPrint.printOnConsole("AdminController().getPropertyDataAndSetInProvider() called", tag: tag);
@@ -57,13 +66,47 @@ class AdminController {
     MyPrint.printOnConsole("Final propertyModel:${adminProvider.propertyModel.get()}", tag: tag);
   }
 
+  Future<void> updatePropertyDataOnlineAndSetInProvider(PropertyModel propertyModel) async {
+    String tag = MyUtils.getUniqueIdFromUuid();
+    MyPrint.printOnConsole("AdminController().getPropertyDataAndSetInProvider() called", tag: tag);
+
+    try {
+      bool isSuccess = await adminRepository.updatePropertyData(propertyModel.toMap());
+      if (isSuccess) {
+        adminProvider.propertyModel.set(value: propertyModel);
+      }
+    } catch (e, s) {
+      MyPrint.printOnConsole("Error in getting PropertyModel in AdminRepository().updatePropertyDataOnlineAndSetInProvider():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+    }
+
+    MyPrint.printOnConsole("Final propertyModel:${adminProvider.propertyModel.get()}", tag: tag);
+  }
+
+  Future<void> updateAssetModelDataAndSetInProvider(AssetsUploadModel assetsUploadModel) async {
+    String tag = MyUtils.getUniqueIdFromUuid();
+    MyPrint.printOnConsole("AdminController().updateAssetModelDataAndSetInProvider() called", tag: tag);
+
+    try {
+      bool? isSuccess = await adminRepository.updateAssetsModalData(assetsUploadModel.toMap());
+      if (isSuccess) {
+        adminProvider.assetsUploadedModel.set(value: assetsUploadModel);
+      }
+    } catch (e, s) {
+      MyPrint.printOnConsole("Error in getting PropertyModel in AdminRepository().updateAssetModelDataAndSetInProvider():$e", tag: tag);
+      MyPrint.printOnConsole(s, tag: tag);
+    }
+
+    MyPrint.printOnConsole("Final propertyModel:${adminProvider.assetsUploadedModel.get()}", tag: tag);
+  }
+
   Future<void> updateBannerImage(PropertyModel propertyModel) async {
     String tag = MyUtils.getUniqueIdFromUuid();
     MyPrint.printOnConsole("AdminController().updateBannerImage() called", tag: tag);
 
     try {
       bool isSuccess = await adminRepository.updatePropertyData(propertyModel.toMap());
-      if(isSuccess) {
+      if (isSuccess) {
         adminProvider.propertyModel.set(value: propertyModel);
       }
     } catch (e, s) {
@@ -90,14 +133,10 @@ class AdminController {
   }
 
   Future<List<FeedbackModel>> getFeedbacks({bool isRefresh = true}) async {
-
-
     return [];
   }
 
   Future<bool> deleteFeedback(String feedbackId) async {
-
-
     return true;
   }
 }

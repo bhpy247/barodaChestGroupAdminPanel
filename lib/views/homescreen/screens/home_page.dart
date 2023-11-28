@@ -18,8 +18,10 @@ import 'package:provider/provider.dart';
 import '../../../backend/common/menu_provider.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/my_print.dart';
+import '../../assetsUpload/assets_upload_screen.dart';
 import '../../common/components/app_response.dart';
 import '../../common/components/side_bar.dart';
+import '../../headline_Text/screens/head_line_text_screen.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = '/HomePage';
@@ -135,6 +137,42 @@ class _HomePageState extends State<HomePage> {
           press: () {
             setState(() {
               tabNumber = 9;
+            });
+          },
+        ),
+        DrawerListTile(
+          title: "Users",
+          icon: Icons.library_books_outlined,
+          press: () {
+            setState(() {
+              tabNumber = 10;
+            });
+          },
+        ),
+        DrawerListTile(
+          title: "Membership Requests",
+          icon: Icons.library_books_outlined,
+          press: () {
+            setState(() {
+              tabNumber = 11;
+            });
+          },
+        ),
+        DrawerListTile(
+          title: "Flash News",
+          icon: Icons.library_books_outlined,
+          press: () {
+            setState(() {
+              tabNumber = 12;
+            });
+          },
+        ),
+        DrawerListTile(
+          title: "Assets",
+          icon: Icons.image,
+          press: () {
+            setState(() {
+              tabNumber = 13;
             });
           },
         ),
@@ -266,6 +304,24 @@ class _HomePageState extends State<HomePage> {
                         });
                       },
                     ),
+                    DrawerListTile(
+                      title: "Assets",
+                      icon: Icons.image,
+                      press: () {
+                        setState(() {
+                          tabNumber = 13;
+                        });
+                      },
+                    ),
+                    DrawerListTile(
+                      title: "Headline Text",
+                      icon: Icons.text_fields,
+                      press: () {
+                        setState(() {
+                          tabNumber = 14;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -343,6 +399,14 @@ class _HomePageState extends State<HomePage> {
       case 12:
         {
           return const SendNotificationScreenNavigator();
+        }
+      case 13:
+        {
+          return const AssetsUploadScreen();
+        }
+      case 14:
+        {
+          return const HeadLineTextScreen();
         }
 
       // case 4:{

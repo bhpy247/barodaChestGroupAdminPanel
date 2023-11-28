@@ -1,18 +1,15 @@
-import 'package:baroda_chest_group_admin/configs/constants.dart';
-import 'package:baroda_chest_group_admin/utils/date_presentation.dart';
-import 'package:baroda_chest_group_admin/utils/parsing_helper.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baroda_chest_group_admin/backend/navigation/navigation_arguments.dart';
+import 'package:baroda_chest_group_admin/configs/constants.dart';
 import 'package:baroda_chest_group_admin/models/course/data_model/chapter_model.dart';
-import 'package:baroda_chest_group_admin/models/course/data_model/course_model.dart';
+import 'package:baroda_chest_group_admin/utils/date_presentation.dart';
 import 'package:baroda_chest_group_admin/utils/extensions.dart';
 import 'package:baroda_chest_group_admin/utils/my_safe_state.dart';
 import 'package:baroda_chest_group_admin/utils/my_utils.dart';
+import 'package:baroda_chest_group_admin/utils/parsing_helper.dart';
 import 'package:baroda_chest_group_admin/views/common/components/common_text.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -57,8 +54,10 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
   TextEditingController addressController = TextEditingController();
   TextEditingController startDateTimeController = TextEditingController();
   TextEditingController endDateTimeController = TextEditingController();
-  TextEditingController totalSeatController = TextEditingController();
+
+  // TextEditingController totalSeatController = TextEditingController();
   TextEditingController youtubeUrlController = TextEditingController();
+  TextEditingController pdfUrlController = TextEditingController();
 
   String? thumbnailImageUrl;
   Uint8List? thumbnailImage;
@@ -69,6 +68,8 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
   List<ChapterModel> chapters = [];
 
   EventModel? pageCourseModel;
+
+  String selectedEventType = EventTypes.typeSocial;
 
   Future<void> getData() async {
     if (widget.arguments.eventModel != null) {
@@ -84,7 +85,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       eventEndDate = pageCourseModel!.eventEndDate!.toDate();
       addressController.text = pageCourseModel!.address;
       youtubeUrlController.text = pageCourseModel!.youtubeUrl;
-      totalSeatController.text = pageCourseModel!.totalSeats.toString();
+      pdfUrlController.text = pageCourseModel!.pdfUrl;
       startDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(pageCourseModel!.eventStartDate!);
       endDateTimeController.text = DatePresentation.ddMMMMyyyyHHMMTimeStamp(pageCourseModel!.eventEndDate!);
     }
@@ -183,7 +184,8 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       address: addressController.text.trim(),
       eventType: selectedEventType,
       youtubeUrl: youtubeUrlController.text.trim(),
-      totalSeats: ParsingHelper.parseIntMethod(totalSeatController.text.trim()),
+      pdfUrl: pdfUrlController.text.trim(),
+      totalSeats: ParsingHelper.parseIntMethod(1000),
       imageUrl: thumbnailImageUrl!.trim(),
       createdTime: pageCourseModel?.createdTime ?? Timestamp.now(),
       updatedTime: pageCourseModel != null ? Timestamp.now() : null,
@@ -207,6 +209,8 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       model.updatedTime = eventModel.updatedTime;
       model.eventStartDate = eventModel.eventStartDate;
       model.eventEndDate = eventModel.eventEndDate;
+      model.pdfUrl = eventModel.pdfUrl;
+      model.youtubeUrl = eventModel.youtubeUrl;
     }
 
     setState(() {
@@ -310,11 +314,13 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
                             const SizedBox(height: 20),
                             getAddressTextField(),
                             const SizedBox(height: 30),
-                            getTotalSeatTextField(),
-                            const SizedBox(height: 30),
+                            // getTotalSeatTextField(),
+                            // const SizedBox(height: 30),
                             getEventTypeSelection(),
                             const SizedBox(height: 30),
-                            getDownloadUrlTextField(),
+                            getYoutubeUrlTextField(),
+                            const SizedBox(height: 20),
+                            getPdfUrlTextField(),
                             const SizedBox(height: 20),
                             Row(
                               children: [
@@ -343,7 +349,6 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
     );
   }
 
-  String selectedEventType = EventTypes.typeSocial;
 
   Widget getEventTypeSelection() {
     return Column(
@@ -511,7 +516,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
     );
   }
 
-  Widget getDownloadUrlTextField() {
+  Widget getYoutubeUrlTextField() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -538,7 +543,7 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
     );
   }
 
-  Widget getTotalSeatTextField() {
+  Widget getPdfUrlTextField() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -547,16 +552,16 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GetTitle(title: "Total Seat"),
+              GetTitle(title: "Pdf URL"),
               CommonTextFormField(
-                controller: totalSeatController,
-                hintText: "Enter total seat",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "  Please enter total seat";
-                  }
-                  return null;
-                },
+                controller: pdfUrlController,
+                hintText: "Enter Pdf URL",
+                // validator: (value) {
+                //   if (value == null || value.isEmpty) {
+                //     return "  Please enter download URL";
+                //   }
+                //   return null;
+                // },
               ),
             ],
           ),
@@ -564,6 +569,33 @@ class _AddCourseState extends State<AddCourse> with MySafeState {
       ],
     );
   }
+
+  // Widget getTotalSeatTextField() {
+  //   return Row(
+  //     crossAxisAlignment: CrossAxisAlignment.center,
+  //     children: [
+  //       Expanded(
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             GetTitle(title: "Total Seat"),
+  //             CommonTextFormField(
+  //               controller: totalSeatController,
+  //               hintText: "Enter total seat",
+  //               validator: (value) {
+  //                 if (value == null || value.isEmpty) {
+  //                   return "  Please enter total seat";
+  //                 }
+  //                 return null;
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget chooseThumbnailImageAndBackgroundColor() {
     return Column(

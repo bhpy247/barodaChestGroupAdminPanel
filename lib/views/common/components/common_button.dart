@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../utils/app_colors.dart';
 
 class CommonButton extends StatelessWidget {
-  Function onTap;
+  Function()? onTap;
   String text;
   double verticalPadding;
   double horizontalPadding;
@@ -13,7 +13,6 @@ class CommonButton extends StatelessWidget {
   Widget? icon;
   Widget? suffixIcon;
   bool isSelected = true;
-
 
   CommonButton({
     Key? key,
@@ -33,7 +32,9 @@ class CommonButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        onTap();
+        if (onTap != null) {
+          onTap!();
+        }
       },
       child: Container(
           padding: EdgeInsets.symmetric(vertical: verticalPadding,horizontal: horizontalPadding),
